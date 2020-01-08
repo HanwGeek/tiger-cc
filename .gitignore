@@ -50,3 +50,8 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Yacc files
+y.tab.h 
+y.tab.c 
+y.output
