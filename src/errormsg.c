@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Error message module to point out the error place.
  * @Date: 2019-10-08 15:46:20
- * @Last Modified: 2020-01-08 21:08:37
+ * @Last Modified: 2020-01-08 21:17:11
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,6 +33,7 @@ void EM_newline(void) {
   linePos = intList(EM_tokPos, linePos);
 }
 
+//* Put error pos and message to stderr
 void EM_error(int pos, char *message, ...) {
   va_list ap;
   intList_ lines = linePos;
