@@ -52,6 +52,7 @@ Mkfile.old
 dkms.conf
 
 # Yacc files
+lex.yy.c
 y.tab.h 
 y.tab.c 
 y.output
