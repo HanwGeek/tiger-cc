@@ -7,7 +7,8 @@ TEST_DIR = ./test
 CC = gcc
 CFLAGS = -I$(INCLUDE_DIR) -Wall -g -c -o 
 
-OBJECTS = util.o errormsg.o table.o symbol.o absyn.o y.tab.o lex.yy.o
+OBJECTS = util.o errormsg.o table.o symbol.o absyn.o env.o translate.o semant.o   \
+					types.o frame.o escape.temp.o y.tab.o lex.yy.o
 OBJS = $(patsubst %, $(OBJ_DIR)/%, $(OBJECTS))
 
 PARSE_TEST = $(BIN_DIR)/parsetest
@@ -19,6 +20,9 @@ parsetest: $(OBJS) $(OBJ_DIR)/prabsyn.o $(OBJ_DIR)/parsetest.o
 	$(CC) $^ -o $(BIN_DIR)/parsetest
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c 
+	$(CC) $(CFLAGS) $@ $<
+
+$(OBJ_DIR)/frame.o: $(SRC_DIR)/x86frame.c 
 	$(CC) $(CFLAGS) $@ $<
 
 $(OBJ_DIR)/lex.yy.o: $(SRC_DIR)/lex.yy.c
