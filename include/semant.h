@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Semantic translate & check module header file.
  * @Date: 2019-10-25 13:44:32
- * @Last Modified: 2020-01-09 11:50:46
+ * @Last Modified: 2020-01-09 15:04:24
  */
 #ifndef T_SEMANT_H_
 #define T_SEMANT_H_
@@ -15,11 +15,6 @@
 
 //* expty: Translated exp & its type
 struct expty {Tr_exp exp; Ty_ty ty;};
-struct expty expTy(Tr_exp exp, Ty_ty ty) {
-  struct expty e;
-  e.exp = exp; e.ty = ty;
-  return e;
-}
 
 F_fragList SEM_transProg(A_exp exp);
 

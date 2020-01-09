@@ -8,7 +8,7 @@ CC = gcc
 CFLAGS = -I$(INCLUDE_DIR) -Wall -g -c -o 
 
 OBJECTS = util.o errormsg.o table.o symbol.o absyn.o env.o translate.o semant.o   \
-					types.o frame.o escape.temp.o y.tab.o lex.yy.o
+					types.o frame.o temp.o y.tab.o lex.yy.o
 OBJS = $(patsubst %, $(OBJ_DIR)/%, $(OBJECTS))
 
 PARSE_TEST = $(BIN_DIR)/parsetest
