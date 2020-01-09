@@ -56,3 +56,6 @@ lex.yy.c
 y.tab.h 
 y.tab.c 
 y.output
+
+# Binaries & Objs
+bin/
