@@ -3,13 +3,14 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Language type defs header file.
  * @Date: 2019-10-24 21:32:39
- * @Last Modified: 2020-01-12 10:47:41
+ * @Last Modified: 2020-01-12 15:43:45
  */
 #ifndef T_TYPE_H_
 #define T_TYPE_H_
 
 #include "symbol.h"
 
+//* Type of exp return value
 typedef struct Ty_ty_ *Ty_ty;
 typedef struct Ty_tyList_ *Ty_tyList;
 typedef struct Ty_field_ *Ty_field;

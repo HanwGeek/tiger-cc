@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Translate to IR module header file.
  * @Date: 2019-10-25 14:17:30
- * @Last Modified: 2019-12-09 20:19:08
+ * @Last Modified: 2020-01-12 15:32:55
  */
 #ifndef T_TRANSLATE_H_
 #define T_TRANSLATE_H_
@@ -17,7 +17,7 @@
 //* Function call nested level 
 //* {Tr_level parent; Temp_label name; F_frame frame; Tr_accessList formals;}
 typedef struct Tr_level_ *Tr_level;
-//* Translated access struct 
+//* Including static link level & F_access 
 //* {Tr_level level; F_access access;}
 typedef struct Tr_access_ *Tr_access;
 //* Translated access list struct
@@ -48,6 +48,7 @@ Tr_level Tr_outermost(void);
 Tr_level Tr_newLevel(Tr_level parent, Temp_label name, U_boolList formals);
 
 Tr_accessList Tr_formals(Tr_level level);
+//* Create a var in {level} with {escape}
 Tr_access Tr_allocLocal(Tr_level level, bool escape);
 
 //* Init an empty exp with const 0

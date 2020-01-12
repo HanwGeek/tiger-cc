@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Semantic tranlate & check module.
  * @Date: 2019-10-25 13:45:45
- * @Last Modified: 2020-01-12 12:54:28
+ * @Last Modified: 2020-01-12 15:38:34
  */
 #include <stdlib.h>
 #include "semant.h"
@@ -386,7 +386,6 @@ static Ty_tyList makeFormalTyList(S_table tenv, A_fieldList params) {
       }
     }
   }
-
   return p;
 }
 

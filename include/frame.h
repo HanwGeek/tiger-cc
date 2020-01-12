@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Stack frame prototype header file.
  * @Date: 2019-10-31 19:22:40
- * @Last Modified: 2020-01-09 11:42:58
+ * @Last Modified: 2020-01-12 15:16:43
  */
 #ifndef T_FRAME_H_
 #define T_FRAME_H_
@@ -12,11 +12,13 @@
 #include "temp.h"
 #include "tree.h"
 
-//* Memeory stack unit
+//* Memeory stack unit, including
+//* all formal access, instruction to 'view shift'
+//* size of frame allocated, function start label
 //* {Temp_label name; F_accessList formals; int local_count;}
 typedef struct F_frame_ *F_frame;
 
-//* Formal param or local var in frame or register
+//* Access of fmal param or local var in frame or register
 //* {enum {inFrame, inReg} kind; union {int offset; Temp_temp reg;} u;}
 typedef struct F_access_ *F_access;
 
@@ -45,7 +47,7 @@ F_fragList F_FragList(F_frag head, F_fragList tail);
 F_frame F_newFrame(Temp_label name, U_boolList formals);
 //* Return formals in frame{f}
 F_accessList F_formals(F_frame f);
-//* Allocate local access in frame{f}
+//* Allocate local var access in frame{f}
 F_access F_allocLocal(F_frame f, bool escape);
 
 //* Current frame pointer reg
