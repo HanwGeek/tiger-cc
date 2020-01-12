@@ -1,9 +1,9 @@
 /*
  * @Author: HanwGeek
  * @Github: https://github.com/HanwGeek
- * @Description: Tranlate to IR module.
+ * @Description: Tranlate abysn to IR module.
  * @Date: 2019-10-31 21:34:35
- * @Last Modified: 2019-12-10 17:30:14
+ * @Last Modified: 2020-01-12 10:40:11
  */
 #include "translate.h"
 #include "absyn.h"
@@ -27,11 +27,12 @@ struct patchList_ {Temp_label *head; patchList tail;};
 //* Condition transfer expression
 struct Cx {patchList trues, falses; T_stm stm;};
 
+//* Combination of {T_exp, T_stm, Cx} in IR
 struct Tr_exp_ {
   enum {
     Tr_ex, //* expression
-    Tr_nx, //* void return
-    Tr_cx  //* condition transfer
+    Tr_nx, //* void return statement
+    Tr_cx  //* condition transfer statement
   } kind;
   union {T_exp ex; T_stm nx; struct Cx cx;} u;
 };

@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Language type defs header file.
  * @Date: 2019-10-24 21:32:39
- * @Last Modified: 2019-10-25 21:30:27
+ * @Last Modified: 2020-01-12 10:47:41
  */
 #ifndef T_TYPE_H_
 #define T_TYPE_H_
@@ -16,8 +16,15 @@ typedef struct Ty_field_ *Ty_field;
 typedef struct Ty_fieldList_ *Ty_fieldList;
 
 struct Ty_ty_ {
-  enum {Ty_record, Ty_nil, Ty_int, Ty_string,
-        Ty_array, Ty_name, Ty_void} kind;
+  enum {
+    Ty_record, //* Record type
+    Ty_nil,    //* Nil type
+    Ty_int,    //* Int type
+    Ty_string, //* String type
+    Ty_array,  //* Array type
+    Ty_name,   //* Item of record type: {symbol{sym}:item{ty}}
+    Ty_void    //* Void type
+  } kind;
   union {
     Ty_fieldList record;
     Ty_ty array;
@@ -44,4 +51,6 @@ Ty_fieldList Ty_FieldList(Ty_field head, Ty_fieldList tail);
 
 void Ty_print(Ty_ty t);
 void TyList_print(Ty_tyList list);
+string Ty_ToString(Ty_ty ty);
+
 #endif

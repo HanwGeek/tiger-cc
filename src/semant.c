@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Semantic tranlate & check module.
  * @Date: 2019-10-25 13:45:45
- * @Last Modified: 2020-01-09 15:05:14
+ * @Last Modified: 2020-01-12 12:54:28
  */
 #include <stdlib.h>
 #include "semant.h"
@@ -19,6 +19,7 @@ static struct expty transExp(Tr_level, S_table, S_table, Tr_exp, A_exp);
 static struct expty expTy(Tr_exp exp, Ty_ty ty);
 static void transDec(Tr_level, S_table, S_table, Tr_exp, A_dec);
 static Ty_ty transTy(S_table, A_ty a);
+//* Return the actual type of Ty_name.ty
 static Ty_ty actual_ty(Ty_ty ty);
 static Ty_ty S_look_ty(S_table tenv, S_symbol sym);
 static U_boolList makeFormals(A_fieldList params);
@@ -32,7 +33,7 @@ F_fragList SEM_transProg(A_exp exp) {
   return Tr_getResult();
 }
 
-//* Translate variable
+//* Translate variable of {simpleVar, fieldVar, subscriptVar  }
 static struct expty transVar(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_var v) {
   switch (v->kind)
   {
@@ -54,6 +55,7 @@ static struct expty transVar(Tr_level level, S_table venv, S_table tenv, Tr_exp 
       if (e.ty != Ty_record) {
         EM_error(v->u.field.var->pos, "error: %s not a record type", S_name(v->u.field.sym));
       } else {
+        // Record var store in a continuous mem space
         int offset = 0;
         for (Ty_fieldList f = e.ty->u.record->head; f; f = f->tail, offset++) {
           if (f->head->name == v->u.field.sym) {

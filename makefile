@@ -8,16 +8,19 @@ CC = gcc
 CFLAGS = -I$(INCLUDE_DIR) -Wall -g -c -o 
 
 OBJECTS = util.o errormsg.o table.o symbol.o absyn.o env.o translate.o semant.o   \
-					types.o frame.o temp.o y.tab.o lex.yy.o
+					types.o frame.o temp.o tree.o y.tab.o lex.yy.o
+TEST_OBJECTS =  prabsyn.o parsetest.o
 OBJS = $(patsubst %, $(OBJ_DIR)/%, $(OBJECTS))
 
 PARSE_TEST = $(BIN_DIR)/parsetest
 
-all: $(OBJS)
+all: $(OBJS) parsetest
 	@echo "Build complete!"
 
 parsetest: $(OBJS) $(OBJ_DIR)/prabsyn.o $(OBJ_DIR)/parsetest.o
 	$(CC) $^ -o $(BIN_DIR)/parsetest
+
+# treetest: $(OBJS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c 
 	$(CC) $(CFLAGS) $@ $<

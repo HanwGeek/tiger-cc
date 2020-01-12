@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Abstract tree defs header file.
  * @Date: 2019-10-21 13:50:02
- * @Last Modified: 2020-01-08 21:15:14
+ * @Last Modified: 2020-01-12 10:38:56
  */
 #ifndef T_ABSYN_H_
 #define T_ABSYN_H_
@@ -13,9 +13,13 @@
 //* Type Definitions
 typedef int A_pos;
 
+//* Abstract syntax variable pointer
 typedef struct A_var_ *A_var;
+//* Abstract syntax expression pointer
 typedef struct A_exp_ *A_exp;
+//* Abstract syntax declartion pointer
 typedef struct A_dec_ *A_dec;
+//* Abstract syntax type pointer
 typedef struct A_ty_ *A_ty;
 
 typedef struct A_decList_ *A_decList;

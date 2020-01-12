@@ -2,7 +2,7 @@
  * @Author: HanwGeek
  * @Github: https://github.com/HanwGeek
  * @Date: 2019-10-24 21:40:21
- * @Last Modified: 2019-10-25 13:43:10
+ * @Last Modified: 2020-01-12 10:19:55
  */
 #include <stdio.h>
 #include "util.h"
@@ -86,5 +86,15 @@ void TyList_print(Ty_tyList list) {
     TyList_print(list->tail);
     printf(")");    
   }
+}
+
+static char error_str_ty[][12] = {
+	"record", "nil", "int", "string",
+	"array", "name", "void"};
+
+string Ty_ToString(Ty_ty ty) {
+	if (ty->kind == Ty_name)
+		return S_name(ty->u.name.sym);
+	return error_str_ty[ty->kind];
 }
 
