@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Stack frame prototype header file.
  * @Date: 2019-10-31 19:22:40
- * @Last Modified: 2020-01-12 15:16:43
+ * @Last Modified: 2020-01-13 16:17:20
  */
 #ifndef T_FRAME_H_
 #define T_FRAME_H_
@@ -52,6 +52,8 @@ F_access F_allocLocal(F_frame f, bool escape);
 
 //* Current frame pointer reg
 Temp_temp F_FP(void);
+//* Return value of function temp
+Temp_temp F_RV(void);
 //* Const val of word size
 extern const int F_WORD_SIZE;
 //* Return the addr of F_access{acc}
@@ -59,5 +61,8 @@ T_exp F_Exp(F_access acc, T_exp framePtr);
 
 //* Call external function
 T_exp F_externalCall(string s, T_expList args);
+
+//*
+T_stm F_procEntryExit1(F_frame frame, T_stm stm);
 
 #endif
