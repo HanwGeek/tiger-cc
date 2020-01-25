@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Data structure table and k-v binder module.
  * @Date: 2019-10-21 15:47:28
- * @Last Modified: 2020-01-08 21:09:56
+ * @Last Modified: 2020-01-25 11:58:43
  */
 #include <stdio.h>
 #include "util.h"
@@ -13,6 +13,7 @@
 #define TABSIZE 127
 #endif
 
+//* k-v binder list 
 typedef struct binder_ *binder;
 struct binder_ {void *key; void *value; binder next; void *prevtop;};
 struct TAB_table_ {

@@ -3,11 +3,12 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Data structure table module header file.
  * @Date: 2019-10-21 13:40:42
- * @Last Modified: 2020-01-08 21:05:13
+ * @Last Modified: 2020-01-25 11:59:20
  */
 #ifndef T_TABLE_H_
 #define T_TABLE_H_
 
+//* k-v list binder array table
 typedef struct TAB_table_ *TAB_table;
 
 //* Make a new table mapping "keys" to "values"

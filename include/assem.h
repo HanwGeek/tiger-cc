@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Function prototypes to translate to Assem-instructions using Maximal Munch.
  * @Date: 2020-01-06 15:19:59
- * @Last Modified: 2020-01-13 16:41:37
+ * @Last Modified: 2020-01-24 23:31:58
  */
 
 #ifndef T_ASSEM_H_
@@ -24,8 +24,11 @@ struct AS_instr_ {
   } u;
 };
 
+//* Instruction for oper between src & dst
 AS_instr AS_Oper(string a, Temp_tempList d, Temp_tempList s, AS_targets j);
+//* Instruction for assem label
 AS_instr AS_Label(string a, Temp_label label);
+//* Instruction for moving data
 AS_instr AS_Move(string a, Temp_tempList d, Temp_tempList s);
 
 void AS_print(FILE *out, AS_instr i, Temp_map m);

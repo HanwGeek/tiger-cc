@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: X86 machine stack frame implement.
  * @Date: 2019-11-01 20:51:20
- * @Last Modified: 2020-01-09 11:42:37
+ * @Last Modified: 2020-01-25 12:00:34
  */
 #include "frame.h"
 
@@ -33,6 +33,14 @@ static F_access InReg(Temp_temp reg);
 static F_accessList F_AccessList(F_access head, F_accessList tail);
 static F_accessList makeFormalAccessList(U_boolList formals);
 
+static Temp_tempList F_make_arg_regs(void);
+static Temp_tempList F_make_calle_saves(void);
+static Temp_tempList F_callee_saves(void);
+static Temp_tempList F_make_caller_saves(void);
+static Temp_tempList F_special_regs(void);
+static Temp_tempList F_arg_regs(void);
+
+static void F_add_to_map(string str, Temp_temp temp);
 
 static F_access InFrame(int offset) {
   F_access fa = checked_malloc(sizeof(*fa));
@@ -52,6 +60,31 @@ static F_accessList F_AccessList(F_access head, F_accessList tail) {
   F_accessList al = checked_malloc(sizeof(*al));
   al->head = head; al->tail = tail;
   return al;
+}
+
+static Temp_tempList F_make_arg_regs(void) {
+  Temp_temp eax = Temp_newtemp(), ebx = Temp_newtemp(),
+            ecx = Temp_newtemp(), edx = Temp_newtemp(),
+            edi = Temp_newtemp(), esi = Temp_newtemp();
+   F_add_to_map("eax", eax); F_add_to_map("ebx", ebx);
+   F_add_to_map("ecx", ecx); F_add_to_map("edx", edx);
+   F_add_to_map("edi", edi); F_add_to_map("esi", esi);
+   return Temp_TempList(eax, Temp_TempList(ebx,
+            Temp_TempList(ecx, Temp_TempList(edx,
+              Temp_TempList(edi, Temp_TempList(esi, NULL))))));
+}
+
+static Temp_tempList F_make_calle_saves(void);
+static Temp_tempList F_callee_saves(void);
+static Temp_tempList F_make_caller_saves(void);
+static Temp_tempList F_special_regs(void);
+static Temp_tempList F_arg_regs(void);
+
+Temp_map F_tempMap = NULL;
+static void F_add_to_map(string str, Temp_temp temp) {
+  if (!F_tempMap)
+    F_tempMap = Temp_name();
+  Temp_enter(F_tempMap, temp, str);
 }
 
 F_frag F_StringFrag(Temp_label label, string str) {
@@ -104,6 +137,10 @@ F_access F_allocLocal(F_frame f, bool escape) {
   f->local_count++;
   if (escape) return InFrame(F_WORD_SIZE * (- f->local_count));
   return InReg(Temp_newtemp());
+}
+
+bool F_isEscape(F_access access) {
+  return access != NULL && access->kind == InFrame;
 }
 
 static Temp_temp fp = NULL;
