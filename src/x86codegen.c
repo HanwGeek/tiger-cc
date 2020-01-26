@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Codegen module for x86.
  * @Date: 2020-01-06 16:44:12
- * @Last Modified: 2020-01-25 00:05:42
+ * @Last Modified: 2020-01-25 14:40:01
  */
 #include <stdlib.h>
 #include "codegen.h"
@@ -202,7 +202,8 @@ static Temp_temp munchExp(T_exp e) {
       Temp_temp t = munchExp(e->u.CALL.fun);
       Temp_tempList plist = munchArgs(0, e->u.CALL.args,
                                       F_formals(CODEGEN_frame));
-      //TODO: caller saves
+      emit(AS_Oper("call `s0\n", F_caller_saves(),
+            Temp_TempList(t, NULL), NULL));
     }
     default: assert(0);
   }

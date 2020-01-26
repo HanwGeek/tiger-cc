@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Semantic tranlate & check module.
  * @Date: 2019-10-25 13:45:45
- * @Last Modified: 2020-01-12 15:38:34
+ * @Last Modified: 2020-01-26 16:16:35
  */
 #include <stdlib.h>
 #include "semant.h"
@@ -24,6 +24,7 @@ static Ty_ty actual_ty(Ty_ty ty);
 static Ty_ty S_look_ty(S_table tenv, S_symbol sym);
 static U_boolList makeFormals(A_fieldList params);
 static Ty_tyList makeFormalTyList(S_table tenv, A_fieldList params);
+static Ty_fieldList makeFieldTys(S_table tenv, A_fieldList fields);
 static int ty_equal(Ty_ty a, Ty_ty b);
 
 F_fragList SEM_transProg(A_exp exp) {
@@ -178,11 +179,11 @@ static struct expty transExp(Tr_level level, S_table venv, S_table tenv, Tr_exp 
       int n = 0;
       Ty_fieldList fieldTys = typ->u.record;
       Tr_expList list = Tr_ExpList();
-      for (A_efieldList recList =a->u.record.fields; recList; recList = recList->tail, fieldTys = fieldTys->tail, n++) {
-        struct expty e = transExp(level, venv, tenv, breakk, recList->head->name);
+      for (A_efieldList recList = a->u.record.fields; recList; recList = recList->tail, fieldTys = fieldTys->tail, n++) {
+        struct expty e = transExp(level, venv, tenv, breakk, recList->head->exp);
         if (recList->head->name != fieldTys->head->name)
           EM_error(a->pos, "error: %s not a valid field name", recList->head->name);
-        if (ty_equal(e.ty, fieldTys->head->ty))
+        if (!ty_equal(e.ty, fieldTys->head->ty))
           EM_error(recList->head->exp->pos, "error: given %s but expect %s", Ty_ToString(e.ty), Ty_ToString(fieldTys->head->ty));
         list = Tr_ExpList_prepend(e.exp, list);
       }
@@ -282,7 +283,7 @@ static struct expty transExp(Tr_level level, S_table venv, S_table tenv, Tr_exp 
       if (size.ty->kind != Ty_int)
         EM_error(a->u.array.size->pos, "error: type int required for array size"); 
       if (!ty_equal(typ->u.array, init.ty))
-        EM_error(a->u.array.init, "error: init type of %s but %s required", Ty_ToString(init.ty), Ty_ToString(typ));
+        EM_error(a->u.array.init->pos, "error: init type of %s but %s required", Ty_ToString(init.ty), Ty_ToString(typ));
       return expTy(Tr_arrayExp(size.exp, init.exp), typ);
     }
     default: assert(0); break;
@@ -321,13 +322,15 @@ void transDec(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_dec d
     }
     case A_typeDec: {
       bool isCycle = TRUE;
+      //* Make type entry with nil type first
       for (A_nametyList nameList = d->u.type; nameList; nameList = nameList->tail)
         S_enter(tenv, nameList->head->name, Ty_Name(nameList->head->name, NULL));
+      
       for (A_nametyList nameList = d->u.type; nameList; nameList = nameList->tail) {
         Ty_ty t = transTy(tenv, nameList->head->ty);
-        if (isCycle) if (t->kind != Ty_name) isCycle = FALSE;
+        if (isCycle && t->kind != Ty_name) isCycle = FALSE;
         Ty_ty nameTy = S_look(tenv, nameList->head->name);
-        nameTy->u.name.ty = t;
+        nameTy->u.name.ty = t; 
       }
       if (isCycle)
         EM_error(d->pos, "error: illegal cycle type");
@@ -336,8 +339,27 @@ void transDec(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_dec d
   }
 }
 
-static Ty_ty transTy(S_table tenv, A_ty a) {
-  
+static Ty_ty transTy(S_table tenv, A_ty t) {
+  Ty_ty ty;
+  switch (t->kind) {
+    case A_nameTy: {
+      ty = S_look(tenv, t->u.name);
+      if (!ty)
+        EM_error(t->pos, "error: undefined type %s", S_name(t->u.name));
+      return ty;
+    }
+    case A_recordTy: {
+      Ty_fieldList fieldTys = makeFieldTys(tenv, t->u.record);
+      return Ty_Record(fieldTys);
+    }
+    case A_arrayTy: {
+      ty = S_look(tenv, t->u.array);
+      if (!ty)
+        EM_error(t->pos, "error: undefined type %s", S_name(t->u.array));
+      return Ty_Array(ty);
+    }
+  }
+  assert(0);
 }
 
 static U_boolList makeFormals(A_fieldList params) {
@@ -394,4 +416,22 @@ static int ty_equal(Ty_ty a, Ty_ty b) {
   return ((a->kind == Ty_record || a->kind == Ty_array) && a == b) ||
          (a->kind == Ty_record && b->kind == Ty_nil) ||
          (a->kind != Ty_record && a->kind != Ty_array) && a->kind == b->kind; 
+}
+
+static Ty_fieldList makeFieldTys(S_table tenv, A_fieldList fields) {
+  Ty_fieldList fieldTys = NULL;
+  for (A_fieldList fieldList = fields; fieldList; fieldList = fieldList->tail) {
+    Ty_ty ty = S_look(tenv, fieldList->head->typ);
+    if (!ty) {
+      EM_error(fieldList->head->pos, "undefined type %s", S_name(fieldList->head->typ));
+    } else {
+      Ty_field f = Ty_Field(fieldList->head->name, ty);
+      if (fieldTys) {
+        fieldTys->tail = Ty_FieldList(f, NULL);
+      } else {
+        fieldTys = Ty_FieldList(f, NULL);
+      }
+    }
+  }
+  return fieldTys;
 }

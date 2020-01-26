@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Stack frame prototype header file.
  * @Date: 2019-10-31 19:22:40
- * @Last Modified: 2020-01-25 12:39:41
+ * @Last Modified: 2020-01-26 11:24:51
  */
 #ifndef T_FRAME_H_
 #define T_FRAME_H_
@@ -25,8 +25,10 @@ typedef struct F_access_ *F_access;
 typedef struct F_accessList_ *F_accessList;
 struct F_accessList_ {F_access head; F_accessList tail;};
 
-typedef struct F_frag_ *F_frag;
+
 //* Fragment of string or function machine code sequence
+//* {F_stringFrag, F_procFrag} kind;
+typedef struct F_frag_ *F_frag;
 struct F_frag_ {
   enum {F_stringFrag, F_procFrag} kind;
   union {
@@ -54,10 +56,15 @@ bool F_isEscape(F_access access);
 
 //* Current frame pointer reg
 Temp_temp F_FP(void);
+//* Current stack pointer reg
+Temp_temp F_SP(void);
 //* Return value of function temp reg
 Temp_temp F_RV(void);
-//* 
-Temp_temp F_SP(void);
+//* Return address of function temp reg
+Temp_temp F_RA(void);
+
+Temp_tempList F_caller_saves(void);
+
 //* Const val of word size
 extern const int F_WORD_SIZE;
 //* Return the addr of F_access{acc}

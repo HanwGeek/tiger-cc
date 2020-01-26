@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Tranlate abysn to IR module.
  * @Date: 2019-10-31 21:34:35
- * @Last Modified: 2020-01-12 10:40:11
+ * @Last Modified: 2020-01-26 16:19:09
  */
 #include "translate.h"
 #include "absyn.h"
@@ -417,7 +417,7 @@ Tr_exp Tr_recordExp(Tr_expList list, int n) {
   Temp_temp r = Temp_newtemp();
   T_stm alloc = T_Move(T_Temp(r),
                 F_externalCall(String("initRecord"), T_ExpList(T_Const(n * F_WORD_SIZE), NULL)));
-  int i = i - 1;
+  int i = n - 1;
   T_stm seq = T_Move(T_Mem(T_Binop(T_plus, T_Temp(r), T_Const(i-- * F_WORD_SIZE))),
                      unEx(list->head));
   for (Tr_expList p = list->tail; p; p = p->tail, i--)

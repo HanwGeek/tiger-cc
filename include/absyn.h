@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Abstract tree defs header file.
  * @Date: 2019-10-21 13:50:02
- * @Last Modified: 2020-01-12 15:42:17
+ * @Last Modified: 2020-01-26 14:51:05
  */
 #ifndef T_ABSYN_H_
 #define T_ABSYN_H_
@@ -19,7 +19,8 @@ typedef struct A_var_ *A_var;
 typedef struct A_exp_ *A_exp;
 //* Abstract syntax declartion pointer
 typedef struct A_dec_ *A_dec;
-//* Abstract syntax type pointer
+//* Abstract syntax type pointer,
+//* including {A_nameTy, A_recordTy, A_arrayTy}
 typedef struct A_ty_ *A_ty;
 
 typedef struct A_decList_ *A_decList;
@@ -30,7 +31,9 @@ typedef struct A_field_ *A_field;
 typedef struct A_fieldList_ *A_fieldList;
 typedef struct A_fundec_ *A_fundec;
 typedef struct A_fundecList_ *A_fundecList;
+//* Abstract syntax of symbol with its type
 typedef struct A_namety_ *A_namety;
+//* Abstract syntax of symbol & type list
 typedef struct A_nametyList_ *A_nametyList;
 typedef struct A_efield_ *A_efield;
 typedef struct A_efieldList_ *A_efieldList;

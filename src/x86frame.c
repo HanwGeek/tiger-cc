@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: X86 machine stack frame implement.
  * @Date: 2019-11-01 20:51:20
- * @Last Modified: 2020-01-25 12:00:34
+ * @Last Modified: 2020-01-25 14:38:40
  */
 #include "frame.h"
 
@@ -34,10 +34,13 @@ static F_accessList F_AccessList(F_access head, F_accessList tail);
 static F_accessList makeFormalAccessList(U_boolList formals);
 
 static Temp_tempList F_make_arg_regs(void);
-static Temp_tempList F_make_calle_saves(void);
-static Temp_tempList F_callee_saves(void);
+static Temp_tempList F_make_callee_saves(void);
 static Temp_tempList F_make_caller_saves(void);
+static Temp_tempList F_callee_saves(void);
+
+//* Return special regs 
 static Temp_tempList F_special_regs(void);
+//* Pass actual params regs
 static Temp_tempList F_arg_regs(void);
 
 static void F_add_to_map(string str, Temp_temp temp);
@@ -74,11 +77,33 @@ static Temp_tempList F_make_arg_regs(void) {
               Temp_TempList(edi, Temp_TempList(esi, NULL))))));
 }
 
-static Temp_tempList F_make_calle_saves(void);
-static Temp_tempList F_callee_saves(void);
-static Temp_tempList F_make_caller_saves(void);
-static Temp_tempList F_special_regs(void);
-static Temp_tempList F_arg_regs(void);
+static Temp_tempList F_make_callee_saves(void) {
+  Temp_temp ebx = Temp_newtemp();
+  F_add_to_map("ebx", ebx);
+  return Temp_TempList(F_SP(),
+          Temp_TempList(F_FP(),
+            Temp_TempList(ebx, NULL)));
+}
+
+static Temp_tempList F_make_caller_saves(void) {
+  return Temp_TempList(F_RV(),
+          F_make_arg_regs());
+}
+
+static Temp_tempList F_callee_saves(void) {
+  return F_make_callee_saves();
+}
+
+static Temp_tempList F_special_regs(void) {
+  return Temp_TempList(F_SP(), 
+          Temp_TempList(F_FP(),
+            Temp_TempList(F_RV(), 
+              Temp_TempList(F_RA(), NULL))));
+}
+
+static Temp_tempList F_arg_regs(void) {
+  return F_make_arg_regs();
+}
 
 Temp_map F_tempMap = NULL;
 static void F_add_to_map(string str, Temp_temp temp) {
@@ -145,9 +170,42 @@ bool F_isEscape(F_access access) {
 
 static Temp_temp fp = NULL;
 Temp_temp F_FP(void) {
-  if (!fp) 
+  if (!fp) {
     fp = Temp_newtemp();
+    F_add_to_map("ebp", fp);
+  }
   return fp;
+}
+
+static Temp_temp sp = NULL;
+Temp_temp F_SP(void) {
+  if (!sp) {
+    sp = Temp_newtemp();
+    F_add_to_map("esp", sp);
+  }
+  return sp;
+}
+
+static Temp_temp ra = NULL;
+Temp_temp F_RA(void) {
+  if (!ra) {
+    ra = Temp_newtemp();
+    F_add_to_map("rdkd", ra);
+  }
+  return ra;
+}
+
+static Temp_temp rv = NULL;
+Temp_temp F_RV(void) {
+  if (!rv) {
+    rv = Temp_newtemp();
+    F_add_to_map("eax", rv);
+  }
+  return rv;
+}
+
+Temp_tempList F_caller_saves(void) {
+  return F_make_caller_saves();
 }
 
 T_exp F_Exp(F_access acc, T_exp framePtr) {

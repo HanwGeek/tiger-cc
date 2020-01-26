@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Language type defs header file.
  * @Date: 2019-10-24 21:32:39
- * @Last Modified: 2020-01-12 15:43:45
+ * @Last Modified: 2020-01-26 14:58:04
  */
 #ifndef T_TYPE_H_
 #define T_TYPE_H_
@@ -13,7 +13,10 @@
 //* Type of exp return value
 typedef struct Ty_ty_ *Ty_ty;
 typedef struct Ty_tyList_ *Ty_tyList;
+//* Type of record field,
+//* including {symbol, ty}
 typedef struct Ty_field_ *Ty_field;
+//* Type of record field list
 typedef struct Ty_fieldList_ *Ty_fieldList;
 
 struct Ty_ty_ {

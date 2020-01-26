@@ -2,7 +2,7 @@
  * @Author: HanwGeek
  * @Github: https://github.com/HanwGeek
  * @Date: 2019-10-25 13:56:49
- * @Last Modified: 2019-11-03 20:16:27
+ * @Last Modified: 2020-01-26 16:03:44
  */
 #include "env.h"
 
@@ -25,9 +25,13 @@ E_enventry E_FunEntry(Tr_level level, Temp_label label, Ty_tyList formals, Ty_ty
 }
 
 S_table E_base_tenv(void) {
-  
+  S_table tenv = S_empty();
+  S_enter(tenv, S_Symbol("int"), Ty_Int());
+  S_enter(tenv, S_Symbol("string"), Ty_String());
+  return tenv;
 }
 
 S_table E_base_venv(void) {
-  
+  S_table venv = S_empty();
+  return venv;
 }
