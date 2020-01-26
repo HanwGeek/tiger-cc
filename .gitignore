@@ -58,4 +58,4 @@ y.tab.c
 y.output
 
 # Binaries & Objs
-bin/
+build/
