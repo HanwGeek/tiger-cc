@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Tranlate abysn to IR module.
  * @Date: 2019-10-31 21:34:35
- * @Last Modified: 2020-01-26 16:19:09
+ * @Last Modified: 2020-01-26 20:21:11
  */
 #include "translate.h"
 #include "absyn.h"
@@ -37,7 +37,8 @@ struct Tr_exp_ {
   union {T_exp ex; T_stm nx; struct Cx cx;} u;
 };
 
-struct Tr_expList_ {Tr_exp head; Tr_expList tail;};
+struct Tr_node_ {Tr_exp exp; Tr_node next};
+struct Tr_expList_ {Tr_node head, tail;};
 
 //* ---------- Static methods ----------
 static patchList PatchList(Temp_label *head, patchList tail);
@@ -220,17 +221,27 @@ Tr_expList Tr_ExpList(void) {
 }
 
 Tr_expList Tr_ExpList_prepend(Tr_exp exp, Tr_expList list) {
-  Tr_expList p = checked_malloc(sizeof(*p));
-  p->head = exp; p->tail = list;
-  return p;
+  if (list->head) {
+    Tr_node n = checked_malloc(sizeof(*n));
+    n->exp = exp;
+    n->next = list->head;
+    list->head= n;
+  } else {
+    list->head = checked_malloc(sizeof(*list->head));
+    list->head->exp = exp;
+    list->head->next = NULL;
+    list->tail = list->head;
+  }
 }
 
 Tr_expList Tr_ExpList_append(Tr_exp exp, Tr_expList list) {
-  Tr_expList p = checked_malloc(sizeof(*p)), t;
-  p->head = exp; p->tail = NULL;
-  for (t = list->tail; t; t = t->tail);
-  t->tail = p;
-  return list;
+  if (list->head) {
+    Tr_node n = checked_malloc(sizeof(*n));
+    n->exp = exp;
+    n->next = NULL;
+    list->tail->next = n;
+    list->tail = n;
+  } else return Tr_ExpList_prepend(exp, list);
 }
 
 Tr_accessList Tr_AccessList(Tr_access head, Tr_accessList tail) {
@@ -419,9 +430,9 @@ Tr_exp Tr_recordExp(Tr_expList list, int n) {
                 F_externalCall(String("initRecord"), T_ExpList(T_Const(n * F_WORD_SIZE), NULL)));
   int i = n - 1;
   T_stm seq = T_Move(T_Mem(T_Binop(T_plus, T_Temp(r), T_Const(i-- * F_WORD_SIZE))),
-                     unEx(list->head));
-  for (Tr_expList p = list->tail; p; p = p->tail, i--)
-    seq = T_Seq(T_Move(T_Mem(T_Binop(T_plus, T_Temp(r), T_Const(i * F_WORD_SIZE))), unEx(p->head)), seq);              
+                     unEx(list->head->exp));
+  for (Tr_node p = list->head->next; p; p = p->next, i--)
+    seq = T_Seq(T_Move(T_Mem(T_Binop(T_plus, T_Temp(r), T_Const(i * F_WORD_SIZE))), unEx(p->exp)), seq);              
   return Tr_Ex(T_Eseq(T_Seq(alloc, seq), T_Temp(r)));
 }
 

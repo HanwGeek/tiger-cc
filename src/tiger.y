@@ -61,7 +61,7 @@ ARRAY IF THEN ELSE WHILE FOR TO DO LET IN END OF
 BREAK NIL
 FUNCTION VAR TYPE 
 
-%nonassoc LOW
+%left LOW
 %right FUNCTION FOR DO LET OF IF THEN ELSE
 %left RBRACK RBRACE
 %right LBRACK LBRACE
@@ -116,7 +116,7 @@ expseq:     exp {$$ = A_ExpList($1, NULL);}
             | {$$ = NULL;}
             ;
 
-funcall:    id LPAREN arglist RPAREN {A_CallExp(EM_tokPos, $1, $3);}
+funcall:    id LPAREN arglist RPAREN {$$ = A_CallExp(EM_tokPos, $1, $3);}
             ;
 
 arglist:    exp {$$ = A_ExpList($1, NULL);}
@@ -174,9 +174,9 @@ fundec:     FUNCTION id LPAREN tyfields RPAREN EQ exp {$$ = A_Fundec(EM_tokPos, 
             ;
 
 lvalue:     id %prec LOW {$$ = A_SimpleVar(EM_tokPos, $1);}
-            |id LBRACK exp RBRACK {A_SubscriptVar(EM_tokPos, A_SimpleVar(EM_tokPos, $1), $3);}
-            |lvalue DOT id {A_FieldVar(EM_tokPos, $1, $3);}
-            |lvalue LBRACK exp RBRACK {A_SubscriptVar(EM_tokPos, $1, $3);}
+            |id LBRACK exp RBRACK {$$ = A_SubscriptVar(EM_tokPos, A_SimpleVar(EM_tokPos, $1), $3);}
+            |lvalue DOT id {$$ = A_FieldVar(EM_tokPos, $1, $3);}
+            |lvalue LBRACK exp RBRACK {$$ = A_SubscriptVar(EM_tokPos, $1, $3);}
             ;
 
 id:         ID {$$ = S_Symbol($1);}

@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Translate to IR module header file.
  * @Date: 2019-10-25 14:17:30
- * @Last Modified: 2020-01-12 15:32:55
+ * @Last Modified: 2020-01-26 20:10:09
  */
 #ifndef T_TRANSLATE_H_
 #define T_TRANSLATE_H_
@@ -24,6 +24,7 @@ typedef struct Tr_access_ *Tr_access;
 typedef struct Tr_accessList_ *Tr_accessList;
 //* Translated exp, including ex, nx and cx;
 typedef struct Tr_exp_ *Tr_exp;
+typedef struct Tr_node_ *Tr_node;
 typedef struct Tr_expList_ *Tr_expList;
 
 struct Tr_accessList_ {

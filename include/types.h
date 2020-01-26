@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Language type defs header file.
  * @Date: 2019-10-24 21:32:39
- * @Last Modified: 2020-01-26 14:58:04
+ * @Last Modified: 2020-01-26 21:24:37
  */
 #ifndef T_TYPE_H_
 #define T_TYPE_H_
@@ -26,7 +26,7 @@ struct Ty_ty_ {
     Ty_int,    //* Int type
     Ty_string, //* String type
     Ty_array,  //* Array type
-    Ty_name,   //* Item of record type: {symbol{sym}:item{ty}}
+    Ty_name,   //* User declared type
     Ty_void    //* Void type
   } kind;
   union {

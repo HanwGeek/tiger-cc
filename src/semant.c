@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Semantic tranlate & check module.
  * @Date: 2019-10-25 13:45:45
- * @Last Modified: 2020-01-26 16:16:35
+ * @Last Modified: 2020-01-26 21:29:23
  */
 #include <stdlib.h>
 #include "semant.h"
@@ -53,12 +53,12 @@ static struct expty transVar(Tr_level level, S_table venv, S_table tenv, Tr_exp 
     case A_fieldVar: {
       struct expty e = transVar(level, venv, tenv, breakk, v->u.field.var);
       Tr_exp tr_ret = Tr_emptyExp();
-      if (e.ty != Ty_record) {
+      if (e.ty->kind != Ty_record) {
         EM_error(v->u.field.var->pos, "error: %s not a record type", S_name(v->u.field.sym));
       } else {
         // Record var store in a continuous mem space
         int offset = 0;
-        for (Ty_fieldList f = e.ty->u.record->head; f; f = f->tail, offset++) {
+        for (Ty_fieldList f = e.ty->u.record; f; f = f->tail, offset++) {
           if (f->head->name == v->u.field.sym) {
             return expTy(Tr_fieldVar(e.exp, offset), actual_ty(f->head->ty));
           }

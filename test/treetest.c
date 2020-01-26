@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Tree print test module.
  * @Date: 2020-01-13 16:16:29
- * @Last Modified: 2020-01-26 14:31:38
+ * @Last Modified: 2020-01-26 21:31:13
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -29,7 +29,7 @@ int main(int argc, char* argv[]) {
   // pr_exp(out, pr_ret, 0);
   
   F_fragList frags = SEM_transProg(pr_ret);
-  for (F_fragList f = frags; f; f = frags->tail) {
+  for (F_fragList f = frags; f; f = f->tail) {
     if (f->head->kind == F_procFrag) {
       printStmList(out, C_linearize(f->head->u.proc.body));
     } else if (f->head->kind == F_stringFrag) {
