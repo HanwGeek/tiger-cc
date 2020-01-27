@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: X86 machine stack frame implement.
  * @Date: 2019-11-01 20:51:20
- * @Last Modified: 2020-01-25 14:38:40
+ * @Last Modified: 2020-01-27 11:38:11
  */
 #include "frame.h"
 
@@ -150,7 +150,7 @@ F_accessList F_formals(F_frame f) {
 F_accessList makeFormalAccessList(U_boolList formals) {
   F_accessList al = NULL;
   int formal_cnt = 0;
-  for (U_boolList fml = formals; fml; fml = formals->tail, formal_cnt++) {
+  for (U_boolList fml = formals; fml; fml = fml->tail, formal_cnt++) {
     //* Assume all are escape var in frame
     F_access a = InFrame((2 + formal_cnt) * F_WORD_SIZE);
     al = F_AccessList(a, al);
@@ -218,4 +218,20 @@ T_exp F_Exp(F_access acc, T_exp framePtr) {
 
 T_exp F_externalCall(string s, T_expList args) {
   return T_Call(T_Name(Temp_namedlabel(s)), args);
+}
+
+T_stm F_procEntryExit1(F_frame frame, T_stm stm) {
+  return stm;
+}
+
+static Temp_tempList returnSink = NULL;
+AS_instrList F_procEntryExit2(AS_instrList body) {
+  if (!returnSink)
+    returnSink = Temp_TempList(F_RA(),
+                  Temp_TempList(F_SP(), F_callee_saves()));
+  return AS_splice(body, AS_instrList(AS_Oper("", NULL, returnSink, NULL), NULL));
+}
+
+AS_proc F_procEntryExit3(F_frame frame, AS_instrList body) {
+  return AS_Proc("prolog", body, "epilog");
 }

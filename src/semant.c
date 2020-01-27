@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Semantic tranlate & check module.
  * @Date: 2019-10-25 13:45:45
- * @Last Modified: 2020-01-26 21:29:23
+ * @Last Modified: 2020-01-27 10:56:29
  */
 #include <stdlib.h>
 #include "semant.h"
@@ -313,12 +313,14 @@ void transDec(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_dec d
       return Tr_assignExp(Tr_simpleVar(access, level), e.exp);
     }
     case A_functionDec: {
+      //TODO: Recursive function dec
       Temp_label label = Temp_newlabel();
       A_fundec f = d->u.function->head;
       Ty_ty resulty = S_look(tenv, f->result);
       Ty_tyList formalTys = makeFormalTyList(tenv, f->params);
       Tr_level lev = Tr_newLevel(level, label, makeFormals(f->params));
       S_enter(venv, f->name, E_FunEntry(lev, Temp_newlabel(), formalTys, resulty));
+      return Tr_emptyExp();
     }
     case A_typeDec: {
       bool isCycle = TRUE;

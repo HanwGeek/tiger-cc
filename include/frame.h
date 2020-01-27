@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Stack frame prototype header file.
  * @Date: 2019-10-31 19:22:40
- * @Last Modified: 2020-01-26 11:24:51
+ * @Last Modified: 2020-01-27 11:31:15
  */
 #ifndef T_FRAME_H_
 #define T_FRAME_H_
@@ -11,6 +11,7 @@
 #include "util.h"
 #include "temp.h"
 #include "tree.h"
+#include "assem.h"
 
 //* Memeory stack unit, including
 //* all formal access, instruction to 'view shift'
@@ -75,5 +76,9 @@ T_exp F_externalCall(string s, T_expList args);
 
 //*
 T_stm F_procEntryExit1(F_frame frame, T_stm stm);
+
+AS_instrList F_procEntryExit2(AS_instrList body);
+
+AS_proc F_procEntryExit3(AS_instrList body);
 
 #endif
