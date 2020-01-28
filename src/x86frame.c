@@ -3,9 +3,10 @@
  * @Github: https://github.com/HanwGeek
  * @Description: X86 machine stack frame implement.
  * @Date: 2019-11-01 20:51:20
- * @Last Modified: 2020-01-27 11:38:11
+ * @Last Modified: 2020-01-28 14:58:42
  */
 #include "frame.h"
+#include "util.h"
 
 //* Formal param or local var in frame or register
 struct F_access_ {
@@ -31,6 +32,7 @@ const int F_WORD_SIZE = 4; //* Define word size
 static F_access InFrame(int offset);
 static F_access InReg(Temp_temp reg);
 static F_accessList F_AccessList(F_access head, F_accessList tail);
+//* Convert formal escapability boollist to F_accessList
 static F_accessList makeFormalAccessList(U_boolList formals);
 
 static Temp_tempList F_make_arg_regs(void);
@@ -141,13 +143,16 @@ F_frame F_newFrame(Temp_label name, U_boolList formals) {
   return f;
 }
 
-//* Return F_formals in F_frame {f}
+Temp_label F_name(F_frame f) {
+  return f->name;
+}
+
 F_accessList F_formals(F_frame f) {
   return f->formals;
 }
 
-//* Convert formal escapability boollist to F_accessList
-F_accessList makeFormalAccessList(U_boolList formals) {
+
+static F_accessList makeFormalAccessList(U_boolList formals) {
   F_accessList al = NULL;
   int formal_cnt = 0;
   for (U_boolList fml = formals; fml; fml = fml->tail, formal_cnt++) {
@@ -165,7 +170,7 @@ F_access F_allocLocal(F_frame f, bool escape) {
 }
 
 bool F_isEscape(F_access access) {
-  return access != NULL && access->kind == InFrame;
+  return access != NULL && access->kind == inFrame;
 }
 
 static Temp_temp fp = NULL;
@@ -229,7 +234,7 @@ AS_instrList F_procEntryExit2(AS_instrList body) {
   if (!returnSink)
     returnSink = Temp_TempList(F_RA(),
                   Temp_TempList(F_SP(), F_callee_saves()));
-  return AS_splice(body, AS_instrList(AS_Oper("", NULL, returnSink, NULL), NULL));
+  return AS_splice(body, AS_InstrList(AS_Oper("", NULL, returnSink, NULL), NULL));
 }
 
 AS_proc F_procEntryExit3(F_frame frame, AS_instrList body) {

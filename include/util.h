@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Utils module header file.
  * @Date: 2019-10-08 15:44:46
- * @Last Modified: 2020-01-13 16:33:02
+ * @Last Modified: 2020-01-27 21:14:03
  */
 #ifndef T_UTIL_H_
 #define T_UTIL_H_
@@ -15,6 +15,8 @@ typedef char bool;
 #define TRUE 1
 #define FALSE 0
 #define BUFSIZE 512
+
+void *checked_malloc(int len);
 
 string String(char *);
 string String_format(const char* s, ...);

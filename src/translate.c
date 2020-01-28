@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Tranlate abysn to IR module.
  * @Date: 2019-10-31 21:34:35
- * @Last Modified: 2020-01-26 20:21:11
+ * @Last Modified: 2020-01-28 16:54:49
  */
 #include "translate.h"
 #include "absyn.h"
@@ -380,14 +380,31 @@ Tr_exp Tr_ifCondExp(Tr_exp cond, Tr_exp then, Tr_exp elsee) {
   Tr_exp ret = Tr_emptyExp();
   doPatch(cxCond.trues, t);
   doPatch(cxCond.falses, f);
-  
+  Temp_label join = Temp_newlabel();
+  Temp_temp r = Temp_newtemp();
+  T_stm joinJump = T_Jump(T_Name(join), Temp_LabelList(join, NULL));
+
   if (elsee) {
     // else
-    // specify else-exp type
-    // TODO:
-    Temp_label join = Temp_newlabel();
-    Temp_temp r = Temp_newtemp();
-    T_stm joinJump = T_Jump(T_Name(join), Temp_LabelList(join, NULL));
+    // specify else-exp type 
+    if (elsee->kind == Tr_ex) {
+      ret = Tr_Ex(T_Eseq(cxCond.stm, 
+              T_Eseq(T_Label(t),
+                T_Eseq(T_Move(T_Temp(r), unEx(then)),
+                  T_Eseq(joinJump,
+                    T_Eseq(T_Label(f), 
+                      T_Eseq(T_Move(T_Temp(r), unEx(elsee)), 
+                        T_Eseq(joinJump, 
+                          T_Eseq(T_Label(join), T_Temp(r))))))))));
+    } else {
+      T_stm thenStm;
+      if (then->kind == Tr_ex) thenStm = T_Exp(then->u.ex);
+      else thenStm = (then->kind == Tr_nx) ? then->u.nx : then->u.cx.stm;
+      T_stm elseeStm = (elsee->kind == Tr_nx) ? elsee->u.nx : elsee->u.cx.stm;
+      ret = Tr_Nx(T_Seq(cxCond.stm, T_Seq(T_Label(t),
+                    T_Seq(joinJump, T_Seq(T_Label(f),
+                      T_Seq(elseeStm, T_Seq(joinJump, T_Label(join))))))));
+    }
   } else {
     // no else
     // specify then-exp type
@@ -405,6 +422,7 @@ Tr_exp Tr_ifCondExp(Tr_exp cond, Tr_exp then, Tr_exp elsee) {
                       T_Exp(unEx(then)), T_Label(f)))));
     }
   }
+  return ret;
 }
 
 Tr_exp Tr_seqExp(Tr_expList list) {

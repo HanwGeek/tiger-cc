@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Definitions for intermediate representation (IR) trees.
  * @Date: 2019-11-04 21:54:03
- * @Last Modified: 2019-11-09 13:58:37
+ * @Last Modified: 2020-01-28 16:40:34
  */
 #ifndef T_TREE_H_
 #define T_TREE_H_
@@ -75,6 +75,7 @@ T_stmList T_StmList(T_stm head, T_stmList tail);
 T_stm T_Seq(T_stm left, T_stm right);
 T_stm T_Label(Temp_label label);
 T_stm T_Jump(T_exp exp, Temp_labelList labels);
+//* Tree of conditional jump with `true` & `false` jmp dst label
 T_stm T_Cjump(T_relOp op, T_exp left, T_exp right, 
 	      Temp_label truee, Temp_label falsee);
 T_stm T_Move(T_exp dst, T_exp src );

@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Semantic tranlate & check module.
  * @Date: 2019-10-25 13:45:45
- * @Last Modified: 2020-01-27 10:56:29
+ * @Last Modified: 2020-01-28 16:07:44
  */
 #include <stdlib.h>
 #include "semant.h"
@@ -14,10 +14,10 @@
 #include "frame.h"
 #include "translate.h"
 
+static struct expty expTy(Tr_exp exp, Ty_ty ty);
 static struct expty transVar(Tr_level, S_table, S_table, Tr_exp, A_var);
 static struct expty transExp(Tr_level, S_table, S_table, Tr_exp, A_exp);
-static struct expty expTy(Tr_exp exp, Ty_ty ty);
-static void transDec(Tr_level, S_table, S_table, Tr_exp, A_dec);
+static Tr_exp transDec(Tr_level, S_table, S_table, Tr_exp, A_dec);
 static Ty_ty transTy(S_table, A_ty a);
 //* Return the actual type of Ty_name.ty
 static Ty_ty actual_ty(Ty_ty ty);
@@ -144,7 +144,7 @@ static struct expty transExp(Tr_level level, S_table venv, S_table tenv, Tr_exp 
         }
         case A_eqOp:
         case A_neqOp: {
-          if (ty_equal(left.ty, right.ty)) {
+          if (!ty_equal(left.ty, right.ty)) {
             EM_error(a->u.op.left->pos, "error: diffrent type cannot be compared");
             return expTy(Tr_emptyExp(), Ty_Int());
           }
@@ -291,7 +291,7 @@ static struct expty transExp(Tr_level level, S_table venv, S_table tenv, Tr_exp 
 }
 
 //* Translate declaration
-void transDec(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_dec d) {
+Tr_exp transDec(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_dec d) {
   switch (d->kind) {
     case A_varDec: {
       struct expty e = transExp(level, venv, tenv, breakk, d->u.var.init);
@@ -313,13 +313,44 @@ void transDec(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_dec d
       return Tr_assignExp(Tr_simpleVar(access, level), e.exp);
     }
     case A_functionDec: {
-      //TODO: Recursive function dec
-      Temp_label label = Temp_newlabel();
-      A_fundec f = d->u.function->head;
-      Ty_ty resulty = S_look(tenv, f->result);
-      Ty_tyList formalTys = makeFormalTyList(tenv, f->params);
-      Tr_level lev = Tr_newLevel(level, label, makeFormals(f->params));
-      S_enter(venv, f->name, E_FunEntry(lev, Temp_newlabel(), formalTys, resulty));
+      //* Process function declaration
+      for (A_fundecList funList = d->u.function; funList; funList = funList->tail) {
+        Ty_ty resultTy = NULL;
+        if (funList->head->result) {
+          resultTy = S_look(tenv, funList->head->result);
+          if (!resultTy)
+            EM_error(funList->head->pos, "error: undefined return type");
+        }
+        if (!resultTy) resultTy = Ty_Void();
+
+        Ty_tyList formalTys = makeFormalTyList(tenv, funList->head->params);
+        U_boolList formals = makeFormals(funList->head->params);
+        Temp_label funLabel = Temp_newlabel();
+        Tr_level funLevel = Tr_newLevel(level, funLabel, formals);
+        S_enter(venv, funList->head->name,
+                E_FunEntry(level, funLabel, formalTys, resultTy));
+      }
+
+      //* Process function definition
+      for (A_fundecList funList = d->u.function; funList; funList = funList->tail) {
+        E_enventry funEntry = S_look(venv, funList->head->name);
+        S_beginScope(venv);
+        Ty_tyList formalTys = funEntry->u.fun.formals;
+        Tr_accessList accessList = Tr_formals(funEntry->u.fun.level);
+        for (A_fieldList paramFields = funList->head->params; paramFields; 
+              paramFields = paramFields->tail, formalTys = formalTys->tail, accessList = accessList->tail) {
+          S_enter(venv, paramFields->head->name,
+                    E_VarEntry(accessList->head, formalTys->head));
+        }
+        
+        struct expty e = transExp(funEntry->u.fun.level, venv, tenv,
+                                    breakk, funList->head->body);
+        if (!ty_equal(funEntry->u.fun.result, e.ty))
+          EM_error(funList->head->body->pos, "error: incompatible return type %s; expected %s",
+                    Ty_ToString(e.ty), Ty_ToString(funList->head->result));
+        Tr_procEntryExit(funEntry->u.fun.level, e.exp, accessList);
+        S_endScope(venv);                                    
+      }
       return Tr_emptyExp();
     }
     case A_typeDec: {
@@ -339,6 +370,7 @@ void transDec(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_dec d
       return Tr_emptyExp();
     }
   }
+  assert(0);
 }
 
 static Ty_ty transTy(S_table tenv, A_ty t) {
@@ -417,7 +449,7 @@ static int ty_equal(Ty_ty a, Ty_ty b) {
   a = actual_ty(a); b = actual_ty(b);
   return ((a->kind == Ty_record || a->kind == Ty_array) && a == b) ||
          (a->kind == Ty_record && b->kind == Ty_nil) ||
-         (a->kind != Ty_record && a->kind != Ty_array) && a->kind == b->kind; 
+         (a->kind != Ty_record && a->kind != Ty_array) && (a->kind == b->kind); 
 }
 
 static Ty_fieldList makeFieldTys(S_table tenv, A_fieldList fields) {

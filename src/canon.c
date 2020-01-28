@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Functions to convert the IR trees into basic blocks and traces.
  * @Date: 2019-12-09 16:22:03
- * @Last Modified: 2019-12-13 16:17:55
+ * @Last Modified: 2020-01-28 11:10:04
  */
 #include <stdio.h>
 #include "util.h"
@@ -93,16 +93,16 @@ static struct stmExp StmExp(T_stm stm, T_exp exp) {
 static struct stmExp do_exp(T_exp exp) {
   switch (exp->kind) {
     case T_BINOP:
-      return StmExp(reorder(ExpRefList(exp->u.BINOP.left, 
-                              ExpRefList(exp->u.BINOP.right, NULL))), exp);
+      return StmExp(reorder(ExpRefList(&exp->u.BINOP.left, 
+                              ExpRefList(&exp->u.BINOP.right, NULL))), exp);
     case T_MEM:
-      return StmExp(reorder(ExpRefList(exp->u.MEM, NULL)), exp);
+      return StmExp(reorder(ExpRefList(&exp->u.MEM, NULL)), exp);
     case T_ESEQ: {
       struct stmExp x = do_exp(exp->u.ESEQ.exp);
       return StmExp(seq(do_stm(exp->u.ESEQ.stm), x.s), x.e);
     }
     case T_CALL:
-      return StmExp(get_call_rlist(exp), exp);
+      return StmExp(reorder(get_call_rlist(exp)), exp);
     default:
       return StmExp(reorder(NULL), exp);
   }
@@ -113,18 +113,18 @@ static T_stm do_stm(T_stm stm) {
     case T_SEQ:
       return seq(do_stm(stm->u.SEQ.left), do_stm(stm->u.SEQ.right));
     case T_JUMP:
-      return seq(reorder(ExpRefList(stm->u.JUMP.exp, NULL)), stm);
+      return seq(reorder(ExpRefList(&stm->u.JUMP.exp, NULL)), stm);
     case T_CJUMP:
-      return seq(reorder(ExpRefList(stm->u.CJUMP.left, 
-                          ExpRefList(stm->u.CJUMP.right, NULL))), stm);
+      return seq(reorder(ExpRefList(&stm->u.CJUMP.left, 
+                          ExpRefList(&stm->u.CJUMP.right, NULL))), stm);
     case T_MOVE:
       if (stm->u.MOVE.dst->kind == T_TEMP && stm->u.MOVE.src->kind == T_CALL)
         return seq(reorder(get_call_rlist(stm->u.MOVE.src)), stm);
       else if (stm->u.MOVE.dst->kind == T_TEMP)
-        return seq(reorder(ExpRefList(stm->u.MOVE.src, NULL)), stm);
-      else if (stm->u.MOVE.dst->kind == T_Mem)
-        return seq(reorder(ExpRefList(stm->u.MOVE.dst->u.MEM, 
-                            ExpRefList(stm->u.MOVE.src, NULL))), stm);
+        return seq(reorder(ExpRefList(&stm->u.MOVE.src, NULL)), stm);
+      else if (stm->u.MOVE.dst->kind == T_MEM)
+        return seq(reorder(ExpRefList(&stm->u.MOVE.dst->u.MEM, 
+                            ExpRefList(&stm->u.MOVE.src, NULL))), stm);
       else if (stm->u.MOVE.dst->kind == T_ESEQ) {
         T_stm s = stm->u.MOVE.dst->u.ESEQ.stm;
         stm->u.MOVE.dst = stm->u.MOVE.dst->u.ESEQ.exp;
@@ -133,7 +133,7 @@ static T_stm do_stm(T_stm stm) {
     case T_EXP:
       if (stm->u.EXP->kind == T_CALL)
         return seq(reorder(get_call_rlist(stm->u.EXP)), stm);
-      else return seq(reorder(ExpRefList(stm->u.EXP, NULL)), stm);
+      else return seq(reorder(ExpRefList(&stm->u.EXP, NULL)), stm);
     default:
       return stm;
   }
@@ -143,7 +143,7 @@ static T_stm reorder(expRefList rlist) {
   if (!rlist) return T_Exp(T_Const(0));
   else if ((*rlist->head)->kind == T_CALL) {
     Temp_temp t = Temp_newtemp();
-    *rlist->head == T_Eseq(T_Move(T_Temp(t), *rlist->head), T_Temp(t)); // Store value in temp
+    *rlist->head = T_Eseq(T_Move(T_Temp(t), *rlist->head), T_Temp(t)); // Store value in temp
     return reorder(rlist);
   } else {
     struct stmExp x = do_exp(*rlist->head);

@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Codegen module for x86.
  * @Date: 2020-01-06 16:44:12
- * @Last Modified: 2020-01-25 14:40:01
+ * @Last Modified: 2020-01-28 11:45:25
  */
 #include <stdlib.h>
 #include "codegen.h"
@@ -16,7 +16,7 @@ static AS_instrList iList = NULL, last = NULL;
 static void emit(AS_instr inst);
 static void munchStm(T_stm s);
 static Temp_temp munchExp(T_exp e);
-static Temp_tempList munchArgs();
+static Temp_tempList munchArgs(unsigned int n, T_expList eList, F_accessList formals);
 
 static F_frame CODEGEN_frame = NULL;
 
@@ -29,7 +29,7 @@ static void munchStm(T_stm s) {
   switch (s->kind) {
     case T_MOVE: {
       T_exp dst = s->u.MOVE.dst, src = s->u.MOVE.src;
-      if (dst->kind = T_MEM) {
+      if (dst->kind == T_MEM) {
         if (dst->u.MEM->kind == T_BINOP &&
             dst->u.MEM->u.BINOP.op == T_plus &&
             dst->u.MEM->u.BINOP.right->kind == T_CONST) {
@@ -40,7 +40,7 @@ static void munchStm(T_stm s) {
                       Temp_TempList(munchExp(e2), NULL))));
             } else if (dst->u.MEM->kind == T_BINOP &&
                        dst->u.MEM->u.BINOP.op == T_plus &&
-                       dst->u.MEM->u.BINOP.left == T_CONST) {
+                       dst->u.MEM->u.BINOP.left->kind == T_CONST) {
               //* MOVE(MEM(BINOP(PLUS, CONST(n), e1)), e2)
               T_exp e1 = dst->u.MEM->u.BINOP.right, e2 = src;
               emit(AS_Move(String_format("mov [`s0 + %d], `s1\n", dst->u.MEM->u.BINOP.left->u.CONST), NULL, 
@@ -59,7 +59,7 @@ static void munchStm(T_stm s) {
                     Temp_TempList(munchExp(e1), 
                       Temp_TempList(munchExp(e2), NULL))));
             }
-      } else if (dst->kind = T_TEMP) {
+      } else if (dst->kind == T_TEMP) {
         emit(AS_Move("mov  `d0, `s0\n", Temp_TempList(munchExp(dst), NULL),
               Temp_TempList(munchExp(src), NULL)));
       } else assert(0);
@@ -125,7 +125,7 @@ static Temp_temp munchExp(T_exp e) {
               Temp_TempList(t, NULL), 
                 Temp_TempList(munchExp(e2), NULL), NULL));
         return t;
-      } else if (e->u.BINOP.right == T_CONST) {
+      } else if (e->u.BINOP.right->kind == T_CONST) {
         //* BINOP(op, e2, CONST(i));
         Temp_temp t = Temp_newtemp();
         T_exp e2 = e->u.BINOP.left;
@@ -138,9 +138,9 @@ static Temp_temp munchExp(T_exp e) {
         Temp_temp t = Temp_newtemp();
         T_exp e1 = e->u.BINOP.left, e2 = e->u.BINOP.right;
         emit(AS_Oper(String_format("%s, `d0, `s0%s`s1\n", op, sign),
-              Temp_LabelList(t, NULL),
+              Temp_TempList(t, NULL),
                 Temp_TempList(munchExp(e1), 
-                  Temp_TempList(e2, NULL)), NULL));
+                  Temp_TempList(munchExp(e2), NULL)), NULL));
         return t;
       }
       return NULL;
@@ -164,7 +164,7 @@ static Temp_temp munchExp(T_exp e) {
         } else assert(0);
       } else if (loc->kind == T_CONST) {
         //* MEM(CONST(i))
-        Temp_temp t = Temp_newtemp;
+        Temp_temp t = Temp_newtemp();
         emit(AS_Move(String_format("mov `d0, [%d]\n", loc->u.CONST),
               Temp_TempList(t, NULL), NULL));
         return t;
@@ -202,6 +202,7 @@ static Temp_temp munchExp(T_exp e) {
       Temp_temp t = munchExp(e->u.CALL.fun);
       Temp_tempList plist = munchArgs(0, e->u.CALL.args,
                                       F_formals(CODEGEN_frame));
+      //TODO:
       emit(AS_Oper("call `s0\n", F_caller_saves(),
             Temp_TempList(t, NULL), NULL));
     }
@@ -227,6 +228,11 @@ static Temp_tempList munchArgs(unsigned int n, T_expList eList, F_accessList for
   return Temp_TempList(e, tlist);
 }
 
-AS_instrList F_codegen(F_frame f, T_stmList stmList) {
-  
+AS_instrList F_codegen(F_frame frame, T_stmList stmList) {
+  CODEGEN_frame = frame;
+  for (T_stmList sList = stmList; sList; sList = sList->tail) 
+    munchStm(sList->head);
+  AS_instrList asList = iList;
+  iList = last = NULL;
+  return asList;
 }

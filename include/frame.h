@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Stack frame prototype header file.
  * @Date: 2019-10-31 19:22:40
- * @Last Modified: 2020-01-27 11:31:15
+ * @Last Modified: 2020-01-28 11:29:39
  */
 #ifndef T_FRAME_H_
 #define T_FRAME_H_
@@ -48,6 +48,8 @@ F_fragList F_FragList(F_frag head, F_fragList tail);
 //* Create a new frame with function {name}
 //* and a bool list represents the escapability of its formals
 F_frame F_newFrame(Temp_label name, U_boolList formals);
+//* Return name of frame
+Temp_label F_name(F_frame f);
 //* Return formals in frame{f}
 F_accessList F_formals(F_frame f);
 //* Allocate local var access in frame{f}
@@ -68,6 +70,7 @@ Temp_tempList F_caller_saves(void);
 
 //* Const val of word size
 extern const int F_WORD_SIZE;
+extern Temp_map F_tempMap;
 //* Return the addr of F_access{acc}
 T_exp F_Exp(F_access acc, T_exp framePtr);
 
@@ -79,6 +82,6 @@ T_stm F_procEntryExit1(F_frame frame, T_stm stm);
 
 AS_instrList F_procEntryExit2(AS_instrList body);
 
-AS_proc F_procEntryExit3(AS_instrList body);
+AS_proc F_procEntryExit3(F_frame frame, AS_instrList body);
 
 #endif
