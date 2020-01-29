@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Tranlate abysn to IR module.
  * @Date: 2019-10-31 21:34:35
- * @Last Modified: 2020-01-29 17:07:45
+ * @Last Modified: 2020-01-29 22:21:18
  */
 #include "translate.h"
 #include "absyn.h"
@@ -37,7 +37,7 @@ struct Tr_exp_ {
   union {T_exp ex; T_stm nx; struct Cx cx;} u;
 };
 
-struct Tr_node_ {Tr_exp exp; Tr_node next};
+struct Tr_node_ {Tr_exp exp; Tr_node next;};
 struct Tr_expList_ {Tr_node head, tail;};
 
 //* ---------- Static methods ----------
@@ -56,11 +56,13 @@ static struct Cx unCx(Tr_exp e);
 
 
 static Tr_exp Tr_Ex(T_exp ex);
-static Tr_exp Tr_Nx(T_exp nx);
+static Tr_exp Tr_Nx(T_stm nx);
 static Tr_exp Tr_Cx(T_stm stm, patchList trues, patchList falses);
 
 static Tr_level outer = NULL;
 static Tr_exp Tr_StaticLink(Tr_level level, Tr_level funLevel);
+//* Convert Tr_node list to T_exp list
+static T_expList Tr_ExpList_convert(Tr_expList list);
 static Tr_access Tr_Access(Tr_level, F_access);
 static Tr_accessList makeFormalAccessList(Tr_level);
 
@@ -104,6 +106,7 @@ static T_exp unEx(Tr_exp e) {
     }
     assert(0); return NULL;
   }
+  return NULL;
 }
 
 
@@ -129,9 +132,11 @@ static T_stm unNx(Tr_exp e) {
     }
     assert(0); return NULL;
   }
+  return NULL;
 }
 
 static struct Cx unCx(Tr_exp e) {
+  struct Cx cx;
   switch (e->kind)
   {
     case Tr_cx: {
@@ -149,6 +154,7 @@ static struct Cx unCx(Tr_exp e) {
     }
     assert(0);
   }
+  return cx;
 }
 
 static Tr_exp Tr_Ex(T_exp ex) {
@@ -157,7 +163,7 @@ static Tr_exp Tr_Ex(T_exp ex) {
   return p;
 }
 
-static Tr_exp Tr_Nx(T_exp nx) {
+static Tr_exp Tr_Nx(T_stm nx) {
   Tr_exp p = checked_malloc(sizeof(*p));
   p->kind = Tr_nx; p->u.nx = nx;
   return p;
@@ -179,6 +185,20 @@ static Tr_exp Tr_StaticLink(Tr_level level, Tr_level funLevel) {
     level = level->parent;
   }
   return Tr_Ex(addr);
+}
+
+static T_expList Tr_ExpList_convert(Tr_expList list) {
+  T_expList ret = NULL, iter = NULL;
+  for (Tr_node p = list->head; p; p = p->next) {
+    if (ret) {
+      iter->tail = T_ExpList(unEx(p->exp), NULL);
+      iter = iter->tail;
+    } else {
+      ret = T_ExpList(unEx(p->exp), NULL);
+      iter = ret;
+    }
+  }
+  return ret;
 }
 
 static Tr_access Tr_Access(Tr_level level, F_access access) {
@@ -220,7 +240,7 @@ Tr_expList Tr_ExpList(void) {
   return p;
 }
 
-Tr_expList Tr_ExpList_prepend(Tr_exp exp, Tr_expList list) {
+void Tr_ExpList_prepend(Tr_exp exp, Tr_expList list) {
   if (list->head) {
     Tr_node n = checked_malloc(sizeof(*n));
     n->exp = exp;
@@ -234,14 +254,14 @@ Tr_expList Tr_ExpList_prepend(Tr_exp exp, Tr_expList list) {
   }
 }
 
-Tr_expList Tr_ExpList_append(Tr_exp exp, Tr_expList list) {
+void Tr_ExpList_append(Tr_exp exp, Tr_expList list) {
   if (list->head) {
     Tr_node n = checked_malloc(sizeof(*n));
     n->exp = exp;
     n->next = NULL;
     list->tail->next = n;
     list->tail = n;
-  } else return Tr_ExpList_prepend(exp, list);
+  } else Tr_ExpList_prepend(exp, list);
 }
 
 Tr_accessList Tr_AccessList(Tr_access head, Tr_accessList tail) {
@@ -352,6 +372,7 @@ Tr_exp Tr_eqStringExp(A_oper op, Tr_exp left, Tr_exp right) {
     T_exp e = (ret->kind == T_CONST && ret->u.CONST == 1) ? T_Const(0) : T_Const(1);
     return Tr_Ex(e);
   }
+  return NULL;
 }
 
 Tr_exp Tr_eqRef(A_oper op, Tr_exp left, Tr_exp right) {
@@ -426,12 +447,12 @@ Tr_exp Tr_ifCondExp(Tr_exp cond, Tr_exp then, Tr_exp elsee) {
 }
 
 Tr_exp Tr_seqExp(Tr_expList list) {
-  Tr_exp ret = Tr_emptyExp();
+  T_exp ret;
   if (list->head)
-    ret = unEx(list->head);
-  for (Tr_expList p = list->tail; p; p = p->tail)
-    ret = T_Eseq(T_Exp(p->head), ret);
-  return ret;
+    ret = unEx(list->head->exp);
+  for (Tr_node p = list->head->next; p; p = p->next)
+    ret = T_Eseq(T_Exp(unEx(p->exp)), ret);
+  return Tr_Ex(ret);
 }
 
 Tr_exp Tr_assignExp(Tr_exp var, Tr_exp exp) {
@@ -439,9 +460,9 @@ Tr_exp Tr_assignExp(Tr_exp var, Tr_exp exp) {
 }
 
 Tr_exp Tr_callExp(Tr_level level, Tr_level funLevel, Temp_label label, Tr_expList argList) {
-  argList = Tr_ExpList_prepend(Tr_StaticLink(level, funLevel), argList);
-  //TODO: Convert args
-  return T_Call(T_Name(label), argList);
+  Tr_ExpList_prepend(Tr_StaticLink(level, funLevel), argList);
+  T_expList args = Tr_ExpList_convert(argList);
+  return Tr_Ex(T_Call(T_Name(label), args));
 }
 
 Tr_exp Tr_recordExp(Tr_expList list, int n) {
@@ -460,7 +481,7 @@ Tr_exp Tr_recordExp(Tr_expList list, int n) {
 Tr_exp Tr_whileExp(Tr_exp cond, Tr_exp done, Tr_exp body) {
   Temp_label condLabel = Temp_newlabel(), bodyLabel = Temp_newlabel();
   return Tr_Ex(T_Eseq(T_Jump(T_Name(condLabel), Temp_LabelList(condLabel, NULL)),
-                T_Eseq(T_Label(bodyLabel), T_Eseq(unEx(body),
+                T_Eseq(T_Label(bodyLabel), T_Eseq(unNx(body),
                   T_Eseq(T_Label(condLabel),
                     T_Eseq(T_Cjump(T_eq, unEx(cond), T_Const(0), unEx(done)->u.NAME, bodyLabel),
                       T_Eseq(T_Label(unEx(done)->u.NAME), T_Const(0))))))));

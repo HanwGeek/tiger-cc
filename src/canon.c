@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Functions to convert the IR trees into basic blocks and traces.
  * @Date: 2019-12-09 16:22:03
- * @Last Modified: 2020-01-28 11:10:04
+ * @Last Modified: 2020-01-29 20:49:30
  */
 #include <stdio.h>
 #include "util.h"
@@ -37,7 +37,7 @@ static T_stm do_stm(T_stm stm);
 //* Return {s, e'} where e' doesn't have ESEQ and 
 //* ESEQ(s, e') is equivalent to ESEQ(s, e)
 static struct stmExp do_exp(T_exp exp);
-
+//* Extract ESEQ from `expRefList`
 static T_stm reorder(expRefList rlist);
 //* linear gets rid of the top-level SEQ's, producing a list
 static T_stmList linear(T_stm stm, T_stmList right);

@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Memory temp var module.
  * @Date: 2019-10-31 19:37:48
- * @Last Modified: 2020-01-12 10:21:40
+ * @Last Modified: 2020-01-29 22:29:37
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -73,15 +73,15 @@ Temp_map Temp_layerMap(Temp_map over, Temp_map under) {
 
 void Temp_enter(Temp_map m, Temp_temp t, string s) {
   assert(m && m->tab);
-  TAB_enter(m, t, s);
+  TAB_enter(m->tab, t, s);
 }
 
 string Temp_look(Temp_map m, Temp_temp t) {
   assert(m && m->tab);
   string s;
-  s = TAB_look(m, t);
+  s = TAB_look(m->tab, t);
   if (s) return s;
-  else if (m->under) return TAB_look(m->under, t);
+  else if (m->under) return Temp_look(m->under, t);
   else return NULL;
 }
 

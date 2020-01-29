@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Semantic tranlate & check module.
  * @Date: 2019-10-25 13:45:45
- * @Last Modified: 2020-01-29 16:51:50
+ * @Last Modified: 2020-01-29 22:27:31
  */
 #include <stdlib.h>
 #include "semant.h"
@@ -75,7 +75,7 @@ static struct expty transVar(Tr_level level, S_table venv, S_table tenv, Tr_exp 
         return expTy(tr_ret, Ty_Int());
       } else {
         struct expty index = transExp(level, venv, tenv, breakk, v->u.subscript.exp);
-        if (index.ty != Ty_int) {
+        if (index.ty != Ty_Int()) {
           EM_error(v->u.subscript.exp->pos, "error: index type of int required");
         } else {
           tr_ret = Tr_subscriptVar(e.exp, index.exp);
@@ -115,7 +115,7 @@ static struct expty transExp(Tr_level level, S_table venv, S_table tenv, Tr_exp 
           struct expty arg = transExp(level, venv, tenv, breakk, args->head);
           if (!ty_equal(arg.ty, formals->head))
             EM_error(args->head->pos, "error: expect formal type %s instead of %s", Ty_ToString(formals->head), Ty_ToString(arg.ty));
-          Tr_ExpList_append(argList, arg.exp);
+          Tr_ExpList_append(arg.exp, argList);
         }
         if (args == NULL && formals != NULL)
           EM_error(a->pos, "error: not enough arguments");
@@ -163,7 +163,7 @@ static struct expty transExp(Tr_level level, S_table venv, S_table tenv, Tr_exp 
         case A_geOp: {
           if (left.ty != right.ty)
             EM_error(a->u.op.left->pos, "error: cannot compare between %s and %s!", Ty_ToString(left.ty), Ty_ToString(right.ty));
-          return expTy(Tr_relOpExp(a->u.op.oper, a->u.op.left, a->u.op.right), Ty_Int());
+          return expTy(Tr_relOpExp(a->u.op.oper, left.exp, right.exp), Ty_Int());
         }
       }
     }
@@ -185,7 +185,7 @@ static struct expty transExp(Tr_level level, S_table venv, S_table tenv, Tr_exp 
           EM_error(a->pos, "error: %s not a valid field name", recList->head->name);
         if (!ty_equal(e.ty, fieldTys->head->ty))
           EM_error(recList->head->exp->pos, "error: given %s but expect %s", Ty_ToString(e.ty), Ty_ToString(fieldTys->head->ty));
-        list = Tr_ExpList_prepend(e.exp, list);
+        Tr_ExpList_prepend(e.exp, list);
       }
       return expTy(Tr_recordExp(list, n), typ);
     }
@@ -194,7 +194,7 @@ static struct expty transExp(Tr_level level, S_table venv, S_table tenv, Tr_exp 
       Tr_expList list = Tr_ExpList();
       for (A_expList p = a->u.seq; p; p = p->tail) {
         exp = transExp(level, venv, tenv, breakk, p->head);
-        list = Tr_ExpList_prepend(exp.exp, list);
+        Tr_ExpList_prepend(exp.exp, list);
       }
       return expTy(Tr_seqExp(list), exp.ty);
     }
@@ -223,12 +223,12 @@ static struct expty transExp(Tr_level level, S_table venv, S_table tenv, Tr_exp 
     }
     case A_whileExp: {
       struct expty cond = transExp(level, venv, tenv, breakk, a->u.whilee.cond);
-      if (cond.ty != Ty_int)
-        EM_error(a->u.whilee.cond, "error: integer type of condition required");
+      if (cond.ty != Ty_Int())
+        EM_error(a->u.whilee.cond->pos, "error: integer type of condition required");
       Tr_exp newBreakk = Tr_doneExp();
       struct expty body = transExp(level, venv, tenv, breakk, a->u.whilee.body);
-      if (body.ty != Ty_void)
-        EM_error(a->u.whilee.body, "error: body-expression must return no value");
+      if (body.ty != Ty_Void())
+        EM_error(a->u.whilee.body->pos, "error: body-expression must return no value");
       return expTy(Tr_whileExp(cond.exp, newBreakk, body.exp), Ty_Void());
     }
     case A_forExp: {
@@ -238,7 +238,7 @@ static struct expty transExp(Tr_level level, S_table venv, S_table tenv, Tr_exp 
       A_exp iExp = A_VarExp(a->pos, A_SimpleVar(a->pos, a->u.forr.var));
       A_exp limitExp = A_VarExp(a->pos, A_SimpleVar(a->pos, S_Symbol("limit")));
       A_exp condExp = A_VarExp(a->pos, A_SimpleVar(a->pos, S_Symbol("cond")));
-      A_exp increment = A_AssignExp(a->pos, a->u.forr.var, A_OpExp(a->pos, A_plusOp, iExp, A_IntExp(a->pos, 1)));
+      A_exp increment = A_AssignExp(a->pos, A_SimpleVar(a->pos, a->u.forr.var), A_OpExp(a->pos, A_plusOp, iExp, A_IntExp(a->pos, 1)));
       A_exp setFalse = A_AssignExp(a->pos, A_SimpleVar(a->pos, S_Symbol("cond")), A_IntExp(a->pos, 0));
       A_exp letExp = A_LetExp(a->pos,
             A_DecList(i, A_DecList(limit, A_DecList(cond, NULL))),
@@ -267,7 +267,7 @@ static struct expty transExp(Tr_level level, S_table venv, S_table tenv, Tr_exp 
       for (A_decList d = a->u.let.decs; d; d = d->tail)
         transDec(level, venv, tenv, breakk, d->head);
       exp = transExp(level, venv, tenv, breakk, a->u.let.body);
-      list = Tr_ExpList_prepend(exp.exp, list);
+      Tr_ExpList_prepend(exp.exp, list);
       S_endScope(venv);
       S_endScope(tenv);
       return expTy(Tr_seqExp(list), exp.ty);
@@ -313,7 +313,7 @@ Tr_exp transDec(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_dec
       return Tr_assignExp(Tr_simpleVar(access, level), e.exp);
     }
     case A_functionDec: {
-      //* Process function declaration
+      //* Process function declaration first in case of recursive function
       for (A_fundecList funList = d->u.function; funList; funList = funList->tail) {
         Ty_ty resultTy = NULL;
         if (funList->head->result) {
@@ -328,7 +328,7 @@ Tr_exp transDec(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_dec
         Temp_label funLabel = Temp_newlabel();
         Tr_level funLevel = Tr_newLevel(level, funLabel, formals);
         S_enter(venv, funList->head->name,
-                E_FunEntry(level, funLabel, formalTys, resultTy));
+                E_FunEntry(funLevel, funLabel, formalTys, resultTy));
       }
 
       //* Process function definition
@@ -347,7 +347,7 @@ Tr_exp transDec(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_dec
                                     breakk, funList->head->body);
         if (!ty_equal(funEntry->u.fun.result, e.ty))
           EM_error(funList->head->body->pos, "error: incompatible return type %s; expected %s",
-                    Ty_ToString(e.ty), Ty_ToString(funList->head->result));
+                    Ty_ToString(e.ty), Ty_ToString(funEntry->u.fun.result));
         Tr_procEntryExit(funEntry->u.fun.level, e.exp, accessList);
         S_endScope(venv);                                    
       }
@@ -449,7 +449,7 @@ static int ty_equal(Ty_ty a, Ty_ty b) {
   a = actual_ty(a); b = actual_ty(b);
   return ((a->kind == Ty_record || a->kind == Ty_array) && a == b) ||
          (a->kind == Ty_record && b->kind == Ty_nil) ||
-         (a->kind != Ty_record && a->kind != Ty_array) && (a->kind == b->kind); 
+         ((a->kind != Ty_record && a->kind != Ty_array) && (a->kind == b->kind)); 
 }
 
 static Ty_fieldList makeFieldTys(S_table tenv, A_fieldList fields) {

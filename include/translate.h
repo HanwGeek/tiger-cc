@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Translate to IR module header file.
  * @Date: 2019-10-25 14:17:30
- * @Last Modified: 2020-01-26 20:10:09
+ * @Last Modified: 2020-01-29 21:37:48
  */
 #ifndef T_TRANSLATE_H_
 #define T_TRANSLATE_H_
@@ -40,9 +40,9 @@ F_fragList Tr_getResult(void);
 
 Tr_expList Tr_ExpList(void);
 //* Prepend to explist head
-Tr_expList Tr_ExpList_prepend(Tr_exp exp, Tr_expList list);
+void Tr_ExpList_prepend(Tr_exp exp, Tr_expList list);
 //* Append to explist tail
-Tr_expList Tr_ExpList_append(Tr_exp exp, Tr_expList list);
+void Tr_ExpList_append(Tr_exp exp, Tr_expList list);
 
 //* Get the outermost level
 Tr_level Tr_outermost(void);
