@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Codegen module for x86.
  * @Date: 2020-01-06 16:44:12
- * @Last Modified: 2020-01-28 11:45:25
+ * @Last Modified: 2020-01-29 17:46:08
  */
 #include <stdlib.h>
 #include "codegen.h"
@@ -157,7 +157,7 @@ static Temp_temp munchExp(T_exp e) {
           return t;
         } else if (loc->u.BINOP.right->kind == T_CONST) {
           Temp_temp t = Temp_newtemp();
-          emit(AS_Move(String_format("mov `s0, `[`d0 + %d]\n", loc->u.BINOP.right->u.CONST),
+          emit(AS_Move(String_format("mov `s0, [`d0 + %d]\n", loc->u.BINOP.right->u.CONST),
                         Temp_TempList(t, NULL),
                           Temp_TempList(munchExp(loc->u.BINOP.left), NULL)));
           return t;           

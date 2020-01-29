@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Semantic tranlate & check module.
  * @Date: 2019-10-25 13:45:45
- * @Last Modified: 2020-01-28 16:07:44
+ * @Last Modified: 2020-01-29 16:51:50
  */
 #include <stdlib.h>
 #include "semant.h"

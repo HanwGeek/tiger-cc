@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Tranlate abysn to IR module.
  * @Date: 2019-10-31 21:34:35
- * @Last Modified: 2020-01-28 16:54:49
+ * @Last Modified: 2020-01-29 17:07:45
  */
 #include "translate.h"
 #include "absyn.h"
@@ -426,7 +426,9 @@ Tr_exp Tr_ifCondExp(Tr_exp cond, Tr_exp then, Tr_exp elsee) {
 }
 
 Tr_exp Tr_seqExp(Tr_expList list) {
-  Tr_exp ret = unEx(list->head);
+  Tr_exp ret = Tr_emptyExp();
+  if (list->head)
+    ret = unEx(list->head);
   for (Tr_expList p = list->tail; p; p = p->tail)
     ret = T_Eseq(T_Exp(p->head), ret);
   return ret;
