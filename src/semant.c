@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Semantic tranlate & check module.
  * @Date: 2019-10-25 13:45:45
- * @Last Modified: 2020-01-29 22:27:31
+ * @Last Modified: 2020-01-31 16:26:29
  */
 #include <stdlib.h>
 #include "semant.h"
@@ -183,7 +183,7 @@ static struct expty transExp(Tr_level level, S_table venv, S_table tenv, Tr_exp 
         struct expty e = transExp(level, venv, tenv, breakk, recList->head->exp);
         if (recList->head->name != fieldTys->head->name)
           EM_error(a->pos, "error: %s not a valid field name", recList->head->name);
-        if (!ty_equal(e.ty, fieldTys->head->ty))
+        if (!ty_equal(fieldTys->head->ty, e.ty))
           EM_error(recList->head->exp->pos, "error: given %s but expect %s", Ty_ToString(e.ty), Ty_ToString(fieldTys->head->ty));
         Tr_ExpList_prepend(e.exp, list);
       }
@@ -355,10 +355,11 @@ Tr_exp transDec(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_dec
     }
     case A_typeDec: {
       bool isCycle = TRUE;
-      //* Make type entry with nil type first
+      //* Make type declaration entry with nil type first
       for (A_nametyList nameList = d->u.type; nameList; nameList = nameList->tail)
         S_enter(tenv, nameList->head->name, Ty_Name(nameList->head->name, NULL));
       
+      //* Process type definition in case of recursive ones
       for (A_nametyList nameList = d->u.type; nameList; nameList = nameList->tail) {
         Ty_ty t = transTy(tenv, nameList->head->ty);
         if (isCycle && t->kind != Ty_name) isCycle = FALSE;

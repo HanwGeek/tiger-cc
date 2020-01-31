@@ -3,10 +3,11 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Codegen module for x86.
  * @Date: 2020-01-06 16:44:12
- * @Last Modified: 2020-01-29 17:46:08
+ * @Last Modified: 2020-01-31 16:12:59
  */
 #include <stdlib.h>
 #include "codegen.h"
+#include "frame.h"
 #include "temp.h"
 #include "util.h"
 
@@ -188,7 +189,7 @@ static Temp_temp munchExp(T_exp e) {
     case T_NAME: {
       //* NAME(n)
       Temp_temp t = Temp_newtemp();
-      //TODO:
+      Temp_enter(F_tempMap, t, Temp_labelstring(e->u.NAME));
       return t;
     }
     case T_CONST: {
@@ -200,11 +201,11 @@ static Temp_temp munchExp(T_exp e) {
     }
     case T_CALL: {
       Temp_temp t = munchExp(e->u.CALL.fun);
-      Temp_tempList plist = munchArgs(0, e->u.CALL.args,
+      Temp_tempList list = munchArgs(0, e->u.CALL.args,
                                       F_formals(CODEGEN_frame));
-      //TODO:
       emit(AS_Oper("call `s0\n", F_caller_saves(),
-            Temp_TempList(t, NULL), NULL));
+            Temp_TempList(t, list), NULL));
+      return t;
     }
     default: assert(0);
   }
