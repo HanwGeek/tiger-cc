@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Memory temp var module.
  * @Date: 2019-10-31 19:37:48
- * @Last Modified: 2020-01-29 22:29:37
+ * @Last Modified: 2020-02-04 16:11:04
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -41,6 +41,18 @@ Temp_label Temp_namedlabel(string name) {
 
 string Temp_labelstring(Temp_label s) {
   return S_name(s);
+}
+
+TL_table TL_empty(void) {
+  return TAB_empty();
+}
+
+void Templabel_enter(TL_table t, Temp_label label, void *v) {
+  return TAB_enter(t, label, v);
+}
+
+TL_table Templabel_look(TL_table t, Temp_label label) {
+  return TAB_look(t, label);
 }
 
 Temp_tempList Temp_TempList(Temp_temp head, Temp_tempList tail) {
