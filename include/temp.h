@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Memory temp var module header file.
  * @Date: 2019-10-31 19:21:13
- * @Last Modified: 2020-02-04 16:10:19
+ * @Last Modified: 2020-02-13 21:47:56
  */
 #ifndef T_TEMP_H_
 #define T_TEMP_H_
@@ -18,7 +18,8 @@ typedef struct TAB_table_ *TL_table;
 typedef struct Temp_temp_ *Temp_temp;
 //* Return a new temp
 Temp_temp Temp_newtemp(void);
-
+//* Return the number of temp
+int Temp_tempnum(Temp_temp t);
 //* label: static memory address name
 typedef S_symbol Temp_label;
 //* Return a new label
@@ -30,7 +31,7 @@ string Temp_labelstring(Temp_label s);
 
 TL_table TL_empty(void);
 void TL_enter(TL_table t, Temp_label label, void *v);
-TL_table TL_look(TL_table t, Temp_label label);
+void* TL_look(TL_table t, Temp_label label);
 
 typedef struct Temp_tempList_ *Temp_tempList;
 struct Temp_tempList_ {Temp_temp head; Temp_tempList tail;};

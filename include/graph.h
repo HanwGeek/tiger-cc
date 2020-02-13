@@ -3,14 +3,17 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Abstract data type for directed graphs
  * @Date: 2020-01-30 10:14:56
- * @Last Modified: 2020-01-30 10:16:52
+ * @Last Modified: 2020-02-13 20:30:10
  */
 #ifndef T_GRAPH_H_
 #define T_GRAPH_H_
 #include <stdio.h>
+#include "util.h"
 
 typedef struct G_graph_ *G_graph;  /* The "graph" type */
-typedef struct G_node_ *G_node;    /* The "node" type */
+//* Graph node, including `key`, `info`,
+//* `succs`, `preds`
+typedef struct G_node_ *G_node;    
 
 typedef struct G_nodeList_ *G_nodeList;
 struct G_nodeList_ { G_node head; G_nodeList tail;};

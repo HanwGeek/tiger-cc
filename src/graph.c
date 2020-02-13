@@ -4,7 +4,7 @@
  * @Description: Functions to manipulate and create control flow and
  * interference graphs.
  * @Date: 2020-01-30 10:15:58
- * @Last Modified: 2020-01-30 10:18:22
+ * @Last Modified: 2020-02-13 20:28:10
  */
 #include "graph.h"
 #include <stdio.h>
@@ -26,9 +26,9 @@ struct G_graph_ {
 struct G_node_ {
   G_graph mygraph;
   int mykey;
+  void *info;
   G_nodeList succs;
   G_nodeList preds;
-  void *info;
 };
 
 G_graph G_Graph(void) {
