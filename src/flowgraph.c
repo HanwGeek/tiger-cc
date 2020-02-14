@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Flowgraph module
  * @Date: 2020-01-31 21:12:21
- * @Last Modified: 2020-02-13 20:43:57
+ * @Last Modified: 2020-02-15 00:48:07
  */
 #include "flowgraph.h"
 #include "assem.h"
@@ -26,7 +26,6 @@ Temp_tempList FG_def(G_node n) {
   if (n != NULL) {
     switch (instr->kind) {
       case I_OPER: return instr->u.OPER.dst;
-      //TODO:
       case I_LABEL: NULL;
       case I_MOVE: return instr->u.MOVE.dst;
       default: assert(0 && "Invalid instrucion kind");
