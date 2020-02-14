@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Liveness module
  * @Date: 2020-01-31 21:04:25
- * @Last Modified: 2020-02-14 18:44:00
+ * @Last Modified: 2020-02-14 23:33:23
  */
 #include "liveness.h"
 #include "graph.h"
@@ -12,17 +12,13 @@
 #include "assem.h"
 #include "util.h"
 
-typedef struct Live_lists_ *Live_lists;
-struct Live_lists_ {
-  Temp_tempList in, out;
-};
-static Live_lists Live_Lists(Temp_tempList in, Temp_tempList out);
 
-static G_table liveMap = NULL, preliveMap = NULL;
+static G_table inLiveMap = NULL, preInLiveMap = NULL;
+static G_table outLiveMap = NULL, preOutLiveMap = NULL;
 static void enterLiveMap(G_table t, G_node flowNode, Temp_tempList temps);
 static Temp_tempList lookupLiveMap(G_table t, G_node flowNode);
 //* Enter temp into an ordered list
-static void enterList(Temp_tempList list, Temp_temp t);
+static Temp_tempList enterList(Temp_tempList list, Temp_temp t);
 //* Assign values of list to the other
 static void assignList(Temp_tempList list1, Temp_tempList list2);
 //* Merge two ordered temp list
@@ -33,12 +29,6 @@ static Temp_tempList substractList(Temp_tempList list1, Temp_tempList list2);
 static bool isequalList(Temp_tempList list1, Temp_tempList list2);
 static bool allNodesFixed(G_graph g, G_table t, G_table prev);
 
-
-static Live_lists Live_Lists(Temp_tempList in, Temp_tempList out) {
-  Live_lists l = checked_malloc(sizeof(*l));
-  l->in = in; l->out = out;
-  return l;
-}
 
 static void enterLiveMap(G_table t, G_node flowNode, Temp_tempList temps) {
   G_enter(t, flowNode, temps);
@@ -58,9 +48,9 @@ static void assignList(Temp_tempList list1, Temp_tempList list2) {
   if (!list2) list1 = list2;
 }
 
-static void enterList(Temp_tempList list, Temp_temp t) {
+static Temp_tempList enterList(Temp_tempList list, Temp_temp t) {
   Temp_tempList cur = list, prev = NULL;
-  while (Temp_tempnum(cur->head) < Temp_tempnum(t)) {
+  while (cur && Temp_tempnum(cur->head) < Temp_tempnum(t)) {
     prev = cur;
     cur = cur->tail;
   }
@@ -69,12 +59,17 @@ static void enterList(Temp_tempList list, Temp_temp t) {
 
 static Temp_tempList mergeList(Temp_tempList list1, Temp_tempList list2) { 
   Temp_tempList p = Temp_TempList(NULL, NULL), prev = p;
-  while (!list1 && !list2) {
-    if (Temp_tempnum(list1->head) < Temp_tempnum(list2->head)) {
+  while (list1 && list2) {
+    int num1 = Temp_tempnum(list1->head), num2 = Temp_tempnum(list2->head);
+    if (num1 < num2) {
       prev->tail = list1;
       list1 = list1->tail;
-    } else {
+    } else if (num1 > num2) {
       prev->tail = list2;
+      list2 = list2->tail;
+    } else {
+      prev->tail = list1;
+      list1 = list1->tail;
       list2 = list2->tail;
     }
     prev = prev->tail;
@@ -120,7 +115,7 @@ static bool isequalList(Temp_tempList list1, Temp_tempList list2) {
 
 static bool allNodesFixed(G_graph g, G_table t, G_table pret) {
   for (G_nodeList nodes = G_nodes(g); nodes; nodes = nodes->tail) 
-    if (!isequalList(lookupLiveMap(liveMap, nodes->head), lookupLiveMap(preliveMap, nodes->head)))
+    if (!isequalList(lookupLiveMap(t, nodes->head), lookupLiveMap(pret, nodes->head)))
       return FALSE;
   return TRUE;
 }
@@ -137,32 +132,34 @@ Temp_temp Live_gtemp(G_node n) {
 }
 
 struct Live_graph Live_liveness(G_graph flow) {
-  if (!liveMap) liveMap = G_empty();
-  if (!preliveMap) preliveMap = G_empty();
+  if (!inLiveMap) inLiveMap = G_empty();
+  if (!preInLiveMap) preInLiveMap = G_empty();
+  if (!outLiveMap) outLiveMap = G_empty();
+  if (!preOutLiveMap) preOutLiveMap = G_empty();
 
-  for (G_nodeList nodes = G_nodes(flow); nodes; nodes = nodes->tail) 
-    enterLiveMap(liveMap, nodes->head, Live_Lists(NULL, NULL));
-  
+  for (G_nodeList nodes = G_nodes(flow); nodes; nodes = nodes->tail) {
+    enterLiveMap(inLiveMap, nodes->head, NULL);
+    enterLiveMap(outLiveMap, nodes->head, NULL);
+  }
+
   //* in[n] = user[n] + (out[n] - def[n])
   //* out[n] = in(succs[n])
   do {
     for (G_nodeList nodes = G_nodes(flow); nodes; nodes = nodes->tail) { 
       G_node node = nodes->head;
-      Live_lists nList = lookupLiveMap(liveMap, node);
-      Live_lists nPrevList = lookupLiveMap(preliveMap, node);
-      if (!nList || !nPrevList) assert(0);
+      Temp_tempList inList = lookupLiveMap(inLiveMap, node), outList = lookupLiveMap(outLiveMap, node);
+      Temp_tempList preInList = lookupLiveMap(preInLiveMap, node), preOutList = lookupLiveMap(preOutLiveMap, node);
 
-      assignList(nPrevList->in, nList->in);
-      assignList(nPrevList->out, nList->out);
-      assignList(nList->in, mergeList(FG_use(node), substractList(nList->out, FG_def(node))));
+      if (!inList || !outList) assert(0);
       
-      Temp_tempList outList = NULL;
-      for (G_nodeList succs = G_succ(node); succs; succs = succs->tail) {
-        Temp_tempList succInList = (Live_lists)lookupLiveMap(liveMap, succs->head);
-        if (!outList) outList = Temp_TempList(succInList)
-      }
+      assignList(preInList, inList); assignList(preOutList, outList);
+      assignList(inList, mergeList(FG_use(node), substractList(outList, FG_def(node))));
+
+      Temp_tempList inSuccsList = NULL;
+      for (G_nodeList succs = G_succ(node); succs; succs = succs->tail) 
+        inSuccsList = mergeList(inSuccsList, lookupLiveMap(inLiveMap, succs->head));
     }
-  } while (!allNodesFixed(flow, liveMap, preliveMap));
+  } while (!allNodesFixed(flow, inLiveMap, preInLiveMap) && !allNodesFixed(flow, outLiveMap, preOutLiveMap));
   
   struct Live_graph lg = {flow, NULL};
   return lg;

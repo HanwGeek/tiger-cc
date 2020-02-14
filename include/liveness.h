@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Process flowgraph to generate confict map and node-pair table
  * @Date: 2020-01-31 16:31:54
- * @Last Modified: 2020-02-13 21:10:25
+ * @Last Modified: 2020-02-14 21:28:19
  */
 #ifndef T_LIVENESS_H_
 #define T_LIVENESS_H_
@@ -13,6 +13,7 @@
 typedef struct Live_moveList_ *Live_moveList;
 typedef struct Live_nodeInfo_ *Live_nodeInfo;
 // typedef struct Live_tempList_ *Live_tempList;
+
 struct Live_moveList_ {
   G_node src, dst;
   Live_moveList tail;
