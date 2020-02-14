@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Abstract data type for directed graphs
  * @Date: 2020-01-30 10:14:56
- * @Last Modified: 2020-02-13 20:30:10
+ * @Last Modified: 2020-02-14 18:09:07
  */
 #ifndef T_GRAPH_H_
 #define T_GRAPH_H_
