@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Abstract data type for directed graphs
  * @Date: 2020-01-30 10:14:56
- * @Last Modified: 2020-02-14 18:09:07
+ * @Last Modified: 2020-02-19 17:30:53
  */
 #ifndef T_GRAPH_H_
 #define T_GRAPH_H_
@@ -25,6 +25,9 @@ G_node G_Node(G_graph g, void *info);
 
 /* Make a NodeList cell */
 G_nodeList G_NodeList(G_node head, G_nodeList tail);
+
+//* Remove node{n} from nodelist{list}
+G_node G_removeList(G_nodeList list, G_node n);
 
 /* Get the list of nodes belonging to "g" */
 G_nodeList G_nodes(G_graph g);

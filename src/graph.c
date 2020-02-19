@@ -4,7 +4,7 @@
  * @Description: Functions to manipulate and create control flow and
  * interference graphs.
  * @Date: 2020-01-30 10:15:58
- * @Last Modified: 2020-02-15 00:31:43
+ * @Last Modified: 2020-02-19 17:43:01
  */
 #include "graph.h"
 #include <stdio.h>
@@ -29,6 +29,7 @@ struct G_node_ {
   void *info;
   G_nodeList succs;
   G_nodeList preds;
+  int degree;
 };
 
 G_graph G_Graph(void) {
@@ -44,6 +45,17 @@ G_nodeList G_NodeList(G_node head, G_nodeList tail) {
   n->head = head;
   n->tail = tail;
   return n;
+}
+
+G_node G_removeList(G_nodeList list, G_node n) {
+  G_nodeList cur = list, prev = NULL;
+  while (cur && cur->head != n) {
+    prev = cur;
+    cur = cur->tail;
+  }
+  prev->tail = cur->tail;
+  //? Mem leak
+  return cur->tail;
 }
 
 /* generic creation of G_node */
@@ -62,6 +74,7 @@ G_node G_Node(G_graph g, void *info) {
   n->succs = NULL;
   n->preds = NULL;
   n->info = info;
+  n->degree = 0;
   return n;
 }
 

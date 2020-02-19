@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Memory temp var module header file.
  * @Date: 2019-10-31 19:21:13
- * @Last Modified: 2020-02-13 21:47:56
+ * @Last Modified: 2020-02-19 17:59:19
  */
 #ifndef T_TEMP_H_
 #define T_TEMP_H_
@@ -51,5 +51,20 @@ string Temp_look(Temp_map m, Temp_temp t);
 void Temp_dumpMap(FILE *out, Temp_map m);
 //* Create an empty map
 Temp_map Temp_name(void);
+
+//* Enter temp into an ordered list
+void Temp_enterList(Temp_tempList list, Temp_temp t);
+//* Remove temp{t} from {list}
+Temp_tempList Temp_removeList(Temp_tempList list, Temp_temp t);
+//* Assign values of list to the other
+void Temp_assignList(Temp_tempList list1, Temp_tempList list2);
+//* Merge two ordered temp list
+Temp_tempList Temp_mergeList(Temp_tempList list1, Temp_tempList list2);
+//* List1 substract elem from list2
+Temp_tempList Temp_substractList(Temp_tempList list1, Temp_tempList list2);
+//* Join two list
+Temp_tempList Temp_joinList(Temp_tempList list1, Temp_tempList list2);
+//* Return if it is equal between two ordered temp list
+bool Temp_isequalList(Temp_tempList list1, Temp_tempList list2);
 
 #endif

@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Memory temp var module.
  * @Date: 2019-10-31 19:37:48
- * @Last Modified: 2020-02-13 21:48:14
+ * @Last Modified: 2020-02-19 17:59:40
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -119,4 +119,98 @@ Temp_map Temp_name(void) {
   static Temp_map m = NULL;
   if (!m) m = Temp_empty();
   return m;
+}
+
+void Temp_assignList(Temp_tempList list1, Temp_tempList list2) {
+  while (!list1 && !list2) {
+    list1->head = list2->head;
+    list1 = list1->tail;
+    list2 = list2->tail;
+  }
+  if (!list1) list1 = NULL;
+  if (!list2) list1 = list2;
+}
+
+void Temp_enterList(Temp_tempList list, Temp_temp t) {
+  Temp_tempList cur = list, prev = NULL;
+  while (cur && Temp_tempnum(cur->head) < Temp_tempnum(t)) {
+    prev = cur;
+    cur = cur->tail;
+  }
+  prev->tail = Temp_TempList(t, cur);
+}
+
+Temp_tempList Temp_removeList(Temp_tempList list, Temp_temp t) {
+  Temp_tempList cur = list, prev = NULL;
+  while (cur && cur->head != t) {
+    prev = cur;
+    cur = cur->tail;
+  }
+  prev->tail = cur->tail;
+  //? Memory Leak
+  return cur->head;
+}
+
+Temp_tempList Temp_mergeList(Temp_tempList list1, Temp_tempList list2) { 
+  Temp_tempList p = Temp_TempList(NULL, NULL), prev = p;
+  while (list1 && list2) {
+    int num1 = Temp_tempnum(list1->head), num2 = Temp_tempnum(list2->head);
+    if (num1 < num2) {
+      prev->tail = list1;
+      list1 = list1->tail;
+    } else if (num1 > num2) {
+      prev->tail = list2;
+      list2 = list2->tail;
+    } else {
+      prev->tail = list1;
+      list1 = list1->tail;
+      list2 = list2->tail;
+    }
+    prev = prev->tail;
+  }
+  prev->tail = list1 == NULL ? list2 : list1;
+  return p->tail;
+}
+
+Temp_tempList Temp_substractList(Temp_tempList list1, Temp_tempList list2) {
+  Temp_tempList retList = NULL, tailList = NULL;
+  while (!list1 && !list2) {
+    int num1 = Temp_tempnum(list1->head), num2 = Temp_tempnum(list2->head);
+    if (num1 < num2) {
+      if (!retList) {
+        retList = Temp_TempList(list1->head, NULL);
+        tailList = retList->tail;
+      }
+      else {
+        tailList = Temp_TempList(list1->head, NULL);
+        tailList = tailList->tail;
+      }
+    }
+    if (num1 == num2) {
+      list1 = list1->tail;
+      list2 = list2->tail;
+    }
+    if (num1 > num2) {
+      list2 = list2->tail;
+    }
+  }
+  tailList = list1;
+  return retList;
+}
+
+Temp_tempList Temp_joinList(Temp_tempList list1, Temp_tempList list2) {
+  if (!list1 || list1 == list2) assert(0);
+  Temp_tempList cur = list1;
+  while (cur->tail) cur = cur->tail;
+  cur->tail = list2;
+  return list1;
+}
+
+bool Temp_isequalList(Temp_tempList list1, Temp_tempList list2) {
+  while (!list1 && !list2) {
+    if (list1->head != list2->head) return FALSE;
+    list1 = list1->tail; list2 = list2->tail;
+  }
+  if (list1 || list2) return FALSE;
+  return TRUE;
 }

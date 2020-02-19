@@ -7,9 +7,9 @@
  -->
 # Tiger-cc
  * The program works of *Modern Compiler Implementations in C*
-  《现代编译原理:C语言描述》课后程序设计作业
- * Current progress: IR translation
-   当前进度: 第7章
+    《现代编译原理:C语言描述》课后程序设计作业
+ * Current progress: Register Allocation
+   当前进度: 第11章
 
 ## 模块结构
 ### table 表:

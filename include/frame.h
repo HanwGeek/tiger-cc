@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Stack frame prototype header file.
  * @Date: 2019-10-31 19:22:40
- * @Last Modified: 2020-01-28 11:29:39
+ * @Last Modified: 2020-02-19 17:51:31
  */
 #ifndef T_FRAME_H_
 #define T_FRAME_H_
@@ -45,39 +45,40 @@ typedef struct F_fragList_ *F_fragList;
 struct F_fragList_ {F_frag head; F_fragList tail;};
 F_fragList F_FragList(F_frag head, F_fragList tail);
 
-//* Create a new frame with function {name}
-//* and a bool list represents the escapability of its formals
-F_frame F_newFrame(Temp_label name, U_boolList formals);
-//* Return name of frame
-Temp_label F_name(F_frame f);
-//* Return formals in frame{f}
-F_accessList F_formals(F_frame f);
+extern Temp_map F_tempMap;
+Temp_tempList F_registers(void);
+string F_getlabel(F_frame frame);
+//* Return the addr of F_access{acc}
+T_exp F_Exp(F_access acc, T_exp framePtr);
 //* Allocate local var access in frame{f}
 F_access F_allocLocal(F_frame f, bool escape);
-//* Whether a F_access is escape or not
-bool F_isEscape(F_access access);
-
+//* Return formals in frame{f}
+F_accessList F_formals(F_frame f);
+//* Return name of frame
+Temp_label F_name(F_frame f);
+//* Const val of word size
+extern const int F_WORD_SIZE;
 //* Current frame pointer reg
 Temp_temp F_FP(void);
 //* Current stack pointer reg
 Temp_temp F_SP(void);
+
+Temp_temp F_ZERO(void);
 //* Return value of function temp reg
 Temp_temp F_RV(void);
 //* Return address of function temp reg
 Temp_temp F_RA(void);
 
-Temp_tempList F_caller_saves(void);
-
-//* Const val of word size
-extern const int F_WORD_SIZE;
-extern Temp_map F_tempMap;
-//* Return the addr of F_access{acc}
-T_exp F_Exp(F_access acc, T_exp framePtr);
-
+//* Create a new frame with function {name}
+//* and a bool list represents the escapability of its formals
+F_frame F_newFrame(Temp_label name, U_boolList formals);
 //* Call external function
 T_exp F_externalCall(string s, T_expList args);
+//* Whether a F_access is escape or not
+bool F_isEscape(F_access access);
 
-//*
+Temp_tempList F_caller_saves(void);
+
 T_stm F_procEntryExit1(F_frame frame, T_stm stm);
 
 AS_instrList F_procEntryExit2(AS_instrList body);
