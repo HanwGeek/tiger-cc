@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Memory temp var module header file.
  * @Date: 2019-10-31 19:21:13
- * @Last Modified: 2020-02-19 17:59:19
+ * @Last Modified: 2020-02-20 14:04:56
  */
 #ifndef T_TEMP_H_
 #define T_TEMP_H_
@@ -47,6 +47,8 @@ typedef struct Temp_map_ *Temp_map;
 Temp_map Temp_empty(void);
 Temp_map Temp_layerMap(Temp_map over, Temp_map under);
 void Temp_enter(Temp_map m, Temp_temp t, string s);
+Temp_temp Temp_pop(Temp_map m);
+Temp_temp Temp_popMap(Temp_map m);
 string Temp_look(Temp_map m, Temp_temp t);
 void Temp_dumpMap(FILE *out, Temp_map m);
 //* Create an empty map

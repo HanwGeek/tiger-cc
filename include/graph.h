@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Abstract data type for directed graphs
  * @Date: 2020-01-30 10:14:56
- * @Last Modified: 2020-02-19 17:30:53
+ * @Last Modified: 2020-02-20 14:23:18
  */
 #ifndef T_GRAPH_H_
 #define T_GRAPH_H_
@@ -26,6 +26,7 @@ G_node G_Node(G_graph g, void *info);
 /* Make a NodeList cell */
 G_nodeList G_NodeList(G_node head, G_nodeList tail);
 
+int G_nodeCount(G_graph g);
 //* Remove node{n} from nodelist{list}
 G_node G_removeList(G_nodeList list, G_node n);
 
@@ -34,6 +35,9 @@ G_nodeList G_nodes(G_graph g);
 
 /* Tell if "a" is in the list "l" */
 bool G_inNodeList(G_node a, G_nodeList l);
+
+//* Find & return node in graph
+G_node G_findInNodes(void *info, G_graph g);
 
 /* Make a new edge joining nodes "from" and "to", which must belong
     to the same graph */

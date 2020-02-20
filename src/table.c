@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Data structure table and k-v binder module.
  * @Date: 2019-10-21 15:47:28
- * @Last Modified: 2020-01-25 11:58:43
+ * @Last Modified: 2020-02-20 13:58:37
  */
 #include <stdio.h>
 #include "util.h"
@@ -58,7 +58,7 @@ void *TAB_look(TAB_table t, void *key) {
 void *TAB_pop(TAB_table t) {
   assert(t);
   void *k = t->top;
-  assert(k);
+  if (k == NULL) return NULL;
   int index = ((unsigned)k) % TABSIZE;
   binder b = t->table[index];
   assert(b);

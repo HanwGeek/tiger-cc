@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Memory temp var module.
  * @Date: 2019-10-31 19:37:48
- * @Last Modified: 2020-02-19 17:59:40
+ * @Last Modified: 2020-02-20 14:07:00
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -92,6 +92,11 @@ void Temp_enter(Temp_map m, Temp_temp t, string s) {
   TAB_enter(m->tab, t, s);
 }
 
+
+Temp_temp Temp_pop(Temp_map m) {
+  return TAB_pop(m->tab);
+}
+
 string Temp_look(Temp_map m, Temp_temp t) {
   assert(m && m->tab);
   string s;
@@ -99,6 +104,14 @@ string Temp_look(Temp_map m, Temp_temp t) {
   if (s) return s;
   else if (m->under) return Temp_look(m->under, t);
   else return NULL;
+}
+
+Temp_temp Temp_popMap(Temp_map m) {
+  if(!m) return NULL;
+  Temp_temp t = TAB_pop(m);
+  if (t) return t;
+  if (m->under) return Temp_popMap(m->under);
+  return NULL;
 }
 
 static FILE *outfile;

@@ -4,7 +4,7 @@
  * @Description: Functions to manipulate and create control flow and
  * interference graphs.
  * @Date: 2020-01-30 10:15:58
- * @Last Modified: 2020-02-19 17:43:01
+ * @Last Modified: 2020-02-20 14:33:35
  */
 #include "graph.h"
 #include <stdio.h>
@@ -45,6 +45,10 @@ G_nodeList G_NodeList(G_node head, G_nodeList tail) {
   n->head = head;
   n->tail = tail;
   return n;
+}
+
+int G_nodeCount(G_graph g) {
+  return g->nodecount;
 }
 
 G_node G_removeList(G_nodeList list, G_node n) {
@@ -89,6 +93,13 @@ bool G_inNodeList(G_node a, G_nodeList l) {
   for (p = l; p != NULL; p = p->tail)
     if (p->head == a) return TRUE;
   return FALSE;
+}
+
+G_node G_findInNodes(void *info, G_graph g) {
+  for (G_nodeList nodes = g->mynodes; nodes; nodes = nodes->tail)
+    if (nodes->head->info == info)
+      return nodes->head;
+  return NULL;
 }
 
 void G_addEdge(G_node from, G_node to) {
