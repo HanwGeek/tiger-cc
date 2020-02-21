@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: color module implement
  * @Date: 2020-02-17 20:05:43
- * @Last Modified: 2020-02-20 14:45:10
+ * @Last Modified: 2020-02-21 12:28:01
  */
 #include <stdlib.h>
 #include "color.h"
@@ -53,14 +53,14 @@ static COL_nodeList worklistMoves = NULL;
 static COL_nodeList freezeWorklist = NULL;
 static COL_nodeList spillWorklist = NULL;
 
-static COL_stack Stack();
+static COL_stack Stack(void);
 static void stackPush(COL_stack s, COL_node t);
 static COL_node stackPop(COL_stack s);
 static void enterSet(adjSet set, adjPair edge);
 static COL_node COL_SimplifyNode(G_node n);
 static COL_node COL_SpillNode(G_node n);
 static void addNode(COL_nodeList list, COL_node n);
-static void rmNode(COL_nodeList list, COL_node n);
+static COL_nodeList rmNode(COL_nodeList list, COL_node n);
 static void makeWorkList(Temp_map initial);
 static COL_node Simplify(void);
 static bool MoveRelated(COL_node n);
@@ -110,16 +110,17 @@ static void addNode(COL_nodeList list, COL_node n) {
     list->prev = list;
   } else {
     COL_nodeList p = checked_malloc(sizeof(*p));
-    list->next->prev = p;
-    p->prev = list;
-    p->next = list->next;
+    p->prev = list; p->next = list->next;
+    if (list->next) list->next->prev = p;
     list->next = p;
   }
 }
 
-static void rmNode(COL_nodeList list, COL_node n) {
+static COL_nodeList rmNode(COL_nodeList list, COL_node n) {
   while (list->n != n) list = list->next;
+  if (list->prev = list) return list->next;
   list->prev->next = list->next;
+  return list;
 }
 
 static void makeWorkList(Temp_map initial) {
@@ -135,7 +136,7 @@ static void makeWorkList(Temp_map initial) {
 
 static COL_node Simplify() {
   for (COL_nodeList nodes = simplifyWorklist; nodes; nodes = nodes->next) {
-    rmNode(simplifyWorklist, nodes->n);
+    simplifyWorklist = rmNode(simplifyWorklist, nodes->n);
     G_node n = nodes->n->n;
     stackPush(selectStack, n);
     for (G_nodeList succs = G_succ(n); succs; succs = succs->tail)
@@ -145,8 +146,18 @@ static COL_node Simplify() {
   } 
 }
 
+static bool MoveRelated(COL_node n) {
+
+}
+
+static void DecrementDegree(COL_node n) {
+  
+}
 struct COL_result COL_color(G_graph ig, Temp_map initial, Temp_tempList regs) {
   degree = (int*)checked_malloc(G_nodeCount(ig) * sizeof(int));
   for (G_nodeList nodes = G_nodes(ig); nodes; nodes = nodes->tail)
     degree[Temp_tempnum(G_nodeInfo(nodes->head))] = G_degree(nodes->head);
+  while (simplifyWorklist) {
+    Simplify();
+  }
 }

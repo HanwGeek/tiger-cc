@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: X86 machine stack frame implement.
  * @Date: 2019-11-01 20:51:20
- * @Last Modified: 2020-01-28 14:58:42
+ * @Last Modified: 2020-02-21 12:02:31
  */
 #include "frame.h"
 #include "util.h"
@@ -134,6 +134,10 @@ F_fragList F_FragList(F_frag head, F_fragList tail) {
   F_fragList f = checked_malloc(sizeof(*f));
   f->head = head; f->tail = tail;
   return f;
+}
+
+Temp_tempList F_registers(void) {
+  
 }
 
 F_frame F_newFrame(Temp_label name, U_boolList formals) {
