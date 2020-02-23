@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: color module implement
  * @Date: 2020-02-17 20:05:43
- * @Last Modified: 2020-02-21 12:28:01
+ * @Last Modified: 2020-02-23 22:25:05
  */
 #include <stdlib.h>
 #include "color.h"
@@ -46,25 +46,36 @@ struct adjSet_ {
   TAB_table s;
 };
 
-static int* degree = NULL;
 static COL_stack selectStack = NULL;
 static COL_nodeList simplifyWorklist = NULL;
+static COL_nodeList spillWorklist = NULL;
+static G_nodeList coloredNodes = NULL;
 static COL_nodeList worklistMoves = NULL;
 static COL_nodeList freezeWorklist = NULL;
-static COL_nodeList spillWorklist = NULL;
+static int* degree = NULL;
+static int *color = NULL;
+static int registers[K];
+static const string regNames[] = {"eax", "ebx", "ecx", "edx", "esi", "edi"};
+//* Adjacent list of graph nodes
+static G_nodeList* adjList = NULL;
 
 static COL_stack Stack(void);
 static void stackPush(COL_stack s, COL_node t);
 static COL_node stackPop(COL_stack s);
+static bool stackEmpty(COL_stack s);
 static void enterSet(adjSet set, adjPair edge);
 static COL_node COL_SimplifyNode(G_node n);
 static COL_node COL_SpillNode(G_node n);
 static void addNode(COL_nodeList list, COL_node n);
 static COL_nodeList rmNode(COL_nodeList list, COL_node n);
 static void makeWorkList(Temp_map initial);
+//* Remove nodes whose degree < K
 static COL_node Simplify(void);
+static void assignColors(void);
 static bool MoveRelated(COL_node n);
 static void DecrementDegree();
+static bool colorEmpty(void);
+static int selectColor(void);
 
 static COL_stack Stack(void) {
   COL_stack s = checked_malloc(sizeof(*s));
@@ -74,7 +85,7 @@ static COL_stack Stack(void) {
 }
 
 static void stackPush(COL_stack s, COL_node n) {
-  if (s->top + 1 == s->size) {
+  if (s->top + 1 >= s->size) {
     s->size += s->size >> 1;
     s->u = (COL_node*)realloc(s->u, s->size * sizeof(COL_node));
   }
@@ -83,7 +94,11 @@ static void stackPush(COL_stack s, COL_node n) {
 
 static COL_node stackPop(COL_stack s) {
   assert(s->top == 0);
-  return s->u[s->top--];
+  return s->u[--s->top];
+}
+
+static bool stackEmpty(COL_stack s) {
+  return s->top == 0;
 }
 
 static void enterSet(adjSet set, adjPair edge) {
@@ -126,6 +141,7 @@ static COL_nodeList rmNode(COL_nodeList list, COL_node n) {
 static void makeWorkList(Temp_map initial) {
   Temp_temp n = NULL;
   while (n = Temp_popMap(initial)) {
+    //TODO: remove `Temp_tempnum`
     if (degree[Temp_tempnum(n)] >= K) 
       addNode(spillWorklist, COL_SpillNode(G_findInNodes(n, initial)));
     else if (MoveRelated(n)) {
@@ -153,11 +169,57 @@ static bool MoveRelated(COL_node n) {
 static void DecrementDegree(COL_node n) {
   
 }
-struct COL_result COL_color(G_graph ig, Temp_map initial, Temp_tempList regs) {
-  degree = (int*)checked_malloc(G_nodeCount(ig) * sizeof(int));
-  for (G_nodeList nodes = G_nodes(ig); nodes; nodes = nodes->tail)
-    degree[Temp_tempnum(G_nodeInfo(nodes->head))] = G_degree(nodes->head);
-  while (simplifyWorklist) {
-    Simplify();
+
+static void assignColors(void) {
+  while (stackEmpty(selectStack)) {
+    COL_node n = stackPop(selectStack);
+    for (G_nodeList nodes = adjList[Temp_tempnum(n)]; nodes; nodes = nodes->tail)
+      if (G_inNodeList(nodes->head, coloredNodes))
+        registers[color[Temp_tempnum(nodes->head)]] = 0;
+    if (colorEmpty())
+      addNode(spillWorklist, n);
+    else {
+      addNode(coloredNodes, n);
+      color[Temp_tempnum(n)] = selectColor();
+    }
   }
 }
+
+static bool colorEmpty(void) {
+  for (int i = 0; i < K; i++)
+    if (registers[i] != 0)
+      return FALSE;
+  return TRUE;
+}
+
+static int selectColor(void) {
+  for (int i = 0; i < K; i++)
+    if (registers[i]) return i;
+  assert(0);
+  return -1;
+}
+
+struct COL_result COL_color(G_graph ig, Temp_map initial, Temp_tempList regs) {
+  int nodeCnt = G_nodeCount(ig);
+  if (!color) color = (int*)checked_malloc(nodeCnt * sizeof(int));
+  for (int i = 0; i < K; i++) color[i] = 1;
+  if (!degree) degree = (int*)checked_malloc(nodeCnt * sizeof(int));
+  if (!adjList) adjList = (G_nodeList*)checked_malloc(nodeCnt * sizeof(G_nodeList));
+  for (G_nodeList nodes = G_nodes(ig); nodes; nodes = nodes->tail) {
+    int tempNum = Temp_tempnum(G_nodeInfo(nodes->head));
+    degree[tempNum] = G_degree(nodes->head);
+    adjList[tempNum] = G_adj(nodes->head);
+  }
+
+  makeWorkList(initial);
+  while (simplifyWorklist) Simplify();
+
+  Temp_map regMap = Temp_name();
+  for (G_nodeList nodes = coloredNodes; nodes; nodes = nodes->tail) {
+    Temp_temp temp = G_nodeInfo(nodes->head);
+    Temp_enter(regMap, temp, regNames[color[Temp_tempnum(temp)]]);
+  }
+  struct COL_result result = {regMap, spillWorklist};
+  return result;
+}
+

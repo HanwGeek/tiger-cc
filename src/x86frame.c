@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: X86 machine stack frame implement.
  * @Date: 2019-11-01 20:51:20
- * @Last Modified: 2020-02-21 12:02:31
+ * @Last Modified: 2020-02-23 21:40:19
  */
 #include "frame.h"
 #include "util.h"
@@ -35,6 +35,7 @@ static F_accessList F_AccessList(F_access head, F_accessList tail);
 //* Convert formal escapability boollist to F_accessList
 static F_accessList makeFormalAccessList(U_boolList formals);
 
+//* Return registers temp
 static Temp_tempList F_make_arg_regs(void);
 static Temp_tempList F_make_callee_saves(void);
 static Temp_tempList F_make_caller_saves(void);
@@ -107,6 +108,7 @@ static Temp_tempList F_arg_regs(void) {
   return F_make_arg_regs();
 }
 
+//* Mapping temps to registers
 Temp_map F_tempMap = NULL;
 static void F_add_to_map(string str, Temp_temp temp) {
   if (!F_tempMap)
@@ -137,7 +139,7 @@ F_fragList F_FragList(F_frag head, F_fragList tail) {
 }
 
 Temp_tempList F_registers(void) {
-  
+  return F_make_arg_regs();
 }
 
 F_frame F_newFrame(Temp_label name, U_boolList formals) {

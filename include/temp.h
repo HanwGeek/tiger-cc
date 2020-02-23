@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Memory temp var module header file.
  * @Date: 2019-10-31 19:21:13
- * @Last Modified: 2020-02-20 14:04:56
+ * @Last Modified: 2020-02-23 21:28:45
  */
 #ifndef T_TEMP_H_
 #define T_TEMP_H_
@@ -41,7 +41,7 @@ typedef struct Temp_labelList_ *Temp_labelList;
 struct Temp_labelList_ {Temp_label head; Temp_labelList tail;};
 Temp_labelList Temp_LabelList(Temp_label head, Temp_labelList tail);
 
-//* TAB_table list
+//* Temp table list 
 typedef struct Temp_map_ *Temp_map;
 //* Create an empty map
 Temp_map Temp_empty(void);

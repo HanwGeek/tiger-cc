@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Data structure table and k-v binder module.
  * @Date: 2019-10-21 15:47:28
- * @Last Modified: 2020-02-20 13:58:37
+ * @Last Modified: 2020-02-23 21:34:15
  */
 #include <stdio.h>
 #include "util.h"
@@ -40,6 +40,7 @@ TAB_table TAB_empty(void) {
 //* Enter the mapping "key" -> "value" into table "t"
 void TAB_enter(TAB_table t, void *key, void *value) {
   assert(t && key);
+  //? Type cast warning
   int index = ((unsigned)key) % TABSIZE;
   t->table[index] = Binder(key, value, t->table[index], t->top);
   t->top = key;
