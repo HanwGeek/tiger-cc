@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Memory temp var module.
  * @Date: 2019-10-31 19:37:48
- * @Last Modified: 2020-02-20 14:07:00
+ * @Last Modified: 2020-02-24 11:16:36
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -108,7 +108,7 @@ string Temp_look(Temp_map m, Temp_temp t) {
 
 Temp_temp Temp_popMap(Temp_map m) {
   if(!m) return NULL;
-  Temp_temp t = TAB_pop(m);
+  Temp_temp t = TAB_pop(m->tab);
   if (t) return t;
   if (m->under) return Temp_popMap(m->under);
   return NULL;
@@ -161,7 +161,7 @@ Temp_tempList Temp_removeList(Temp_tempList list, Temp_temp t) {
   }
   prev->tail = cur->tail;
   //? Memory Leak
-  return cur->head;
+  return list;
 }
 
 Temp_tempList Temp_mergeList(Temp_tempList list1, Temp_tempList list2) { 

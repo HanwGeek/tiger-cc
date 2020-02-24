@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Liveness module
  * @Date: 2020-01-31 21:04:25
- * @Last Modified: 2020-02-21 11:55:48
+ * @Last Modified: 2020-02-24 11:38:03
  */
 #include "liveness.h"
 #include "graph.h"
@@ -32,7 +32,7 @@ static Temp_tempList lookupLiveMap(G_table t, G_node flowNode) {
 
 static bool allNodesFixed(G_graph g, G_table t, G_table pret) {
   for (G_nodeList nodes = G_nodes(g); nodes; nodes = nodes->tail) 
-    if (!isequalList(lookupLiveMap(t, nodes->head), lookupLiveMap(pret, nodes->head)))
+    if (!Temp_isequalList(lookupLiveMap(t, nodes->head), lookupLiveMap(pret, nodes->head)))
       return FALSE;
   return TRUE;
 }
@@ -83,8 +83,8 @@ struct Live_graph Live_liveness(G_graph flow) {
 
       if (!inList || !outList) assert(0);
       
-      assignList(preInList, inList); Temp_assignList(preOutList, outList);
-      assignList(inList, Temp_mergeList(FG_use(node), Temp_substractList(outList, FG_def(node))));
+      Temp_assignList(preInList, inList); Temp_assignList(preOutList, outList);
+      Temp_assignList(inList, Temp_mergeList(FG_use(node), Temp_substractList(outList, FG_def(node))));
 
       Temp_tempList inSuccsList = NULL;
       for (G_nodeList succs = G_succ(node); succs; succs = succs->tail) 
@@ -96,21 +96,24 @@ struct Live_graph Live_liveness(G_graph flow) {
   for (G_nodeList nodes = G_nodes(flow); nodes; nodes = nodes->tail) {
     G_node node = nodes->head;
     if (!FG_isMove(node)) {
-      Temp_temp defVar = FG_use(node);
-      if (defVar) {
+      Temp_tempList defVars = FG_use(node);
+      if (defVars) {
         Temp_tempList liveVars = lookupLiveMap(outLiveMap, node);
-        for (; liveVars; liveVars = liveVars->tail)
-          addCollEdge(collision, defVar, liveVars->head);
+        for (; defVars; defVars = defVars->tail)
+          for (; liveVars; liveVars = liveVars->tail)
+            addCollEdge(collision, defVars->head, liveVars->head);
       }
     } else if (FG_isMove(node)) {
       Temp_tempList liveVars = lookupLiveMap(outLiveMap, node);
       for (; liveVars; liveVars = liveVars->tail) {
         Temp_temp liveVar = liveVars->head;
-        Temp_temp moveSrc = ((AS_instr)G_nodeInfo(node))->u.MOVE.src;
-        Temp_temp moveDst = ((AS_instr)G_nodeInfo(node))->u.MOVE.dst;
-        if (moveSrc != liveVar) {
-          addCollEdge(collision, moveDst, liveVar);
-        }
+        Temp_tempList moveSrc = ((AS_instr)G_nodeInfo(node))->u.MOVE.src;
+        Temp_tempList moveDst = ((AS_instr)G_nodeInfo(node))->u.MOVE.dst;
+        for (; moveSrc; moveSrc = moveSrc->tail)
+          if (moveSrc->head != liveVar) 
+            for (; moveDst; moveDst = moveDst->tail)
+              addCollEdge(collision, moveDst->head, liveVar);
+          
       }
     }
   }

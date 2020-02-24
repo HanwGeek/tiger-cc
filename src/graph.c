@@ -4,7 +4,7 @@
  * @Description: Functions to manipulate and create control flow and
  * interference graphs.
  * @Date: 2020-01-30 10:15:58
- * @Last Modified: 2020-02-20 14:33:35
+ * @Last Modified: 2020-02-24 11:17:21
  */
 #include "graph.h"
 #include <stdio.h>
@@ -59,7 +59,7 @@ G_node G_removeList(G_nodeList list, G_node n) {
   }
   prev->tail = cur->tail;
   //? Mem leak
-  return cur->tail;
+  return n;
 }
 
 /* generic creation of G_node */

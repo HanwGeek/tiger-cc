@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Tranlate abysn to IR module.
  * @Date: 2019-10-31 21:34:35
- * @Last Modified: 2020-01-29 22:21:18
+ * @Last Modified: 2020-02-24 11:14:43
  */
 #include "translate.h"
 #include "absyn.h"
@@ -418,13 +418,13 @@ Tr_exp Tr_ifCondExp(Tr_exp cond, Tr_exp then, Tr_exp elsee) {
                         T_Eseq(joinJump, 
                           T_Eseq(T_Label(join), T_Temp(r))))))))));
     } else {
-      T_stm thenStm;
+      T_stm thenStm = NULL;
       if (then->kind == Tr_ex) thenStm = T_Exp(then->u.ex);
       else thenStm = (then->kind == Tr_nx) ? then->u.nx : then->u.cx.stm;
       T_stm elseeStm = (elsee->kind == Tr_nx) ? elsee->u.nx : elsee->u.cx.stm;
-      ret = Tr_Nx(T_Seq(cxCond.stm, T_Seq(T_Label(t),
+      ret = Tr_Nx(T_Seq(cxCond.stm, T_Seq(T_Label(t), T_Seq(thenStm,
                     T_Seq(joinJump, T_Seq(T_Label(f),
-                      T_Seq(elseeStm, T_Seq(joinJump, T_Label(join))))))));
+                      T_Seq(elseeStm, T_Seq(joinJump, T_Label(join)))))))));
     }
   } else {
     // no else

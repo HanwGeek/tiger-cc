@@ -3,16 +3,17 @@
  * @Github: https://github.com/HanwGeek
  * @Description: color module implement
  * @Date: 2020-02-17 20:05:43
- * @Last Modified: 2020-02-23 22:25:05
+ * @Last Modified: 2020-02-24 11:44:58
  */
 #include <stdlib.h>
 #include "color.h"
+#include "frame.h"
 #include "graph.h"
 #include "temp.h"
 #include "table.h"
 
-const int STACK_SIZE = 256;
-const int K = 6;
+static const int STACK_SIZE = 256;
+static const int K = 6;
 typedef struct COL_stack_ *COL_stack;
 typedef struct COL_node_ *COL_node;
 typedef struct COL_nodeList_ *COL_nodeList;
