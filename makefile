@@ -8,8 +8,8 @@ CC = gcc
 CFLAGS = -I$(INCLUDE_DIR) -Wall -g -c -o
 
 OBJECTS = util.o errormsg.o table.o symbol.o absyn.o env.o translate.o semant.o   \
-					types.o frame.o temp.o tree.o canon.o assem.o codegen.o graph.o flowgraph.o \
-					liveness.o color.o regalloc.o y.tab.o lex.yy.o
+					types.o frame.o temp.o tree.o canon.o assem.o codegen.o graph.o escape.o \
+					flowgraph.o liveness.o color.o regalloc.o y.tab.o lex.yy.o
 PARSETEST_OBJECTS = prabsyn.o parse.o parsetest.o
 TREETEST_OBJECTS  = printtree.o prabsyn.o parse.o treetest.o
 CODEGENTEST_OBJECTS = printtree.o prabsyn.o parse.o parse.o codegentest.o

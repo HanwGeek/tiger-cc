@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Semantic tranlate & check module.
  * @Date: 2019-10-25 13:45:45
- * @Last Modified: 2020-02-24 18:51:21
+ * @Last Modified: 2020-02-25 20:26:57
  */
 #include <stdlib.h>
 #include "semant.h"
@@ -11,6 +11,7 @@
 #include "errormsg.h"
 #include "types.h"
 #include "env.h"
+#include "escape.h"
 #include "frame.h"
 #include "translate.h"
 
@@ -26,13 +27,6 @@ static U_boolList makeFormals(A_fieldList params);
 static Ty_tyList makeFormalTyList(S_table tenv, A_fieldList params);
 static Ty_fieldList makeFieldTys(S_table tenv, A_fieldList fields);
 static int ty_equal(Ty_ty a, Ty_ty b);
-
-F_fragList SEM_transProg(A_exp exp) {
-  S_table tenv = E_base_tenv();
-  S_table venv = E_base_venv();
-  transExp(Tr_outermost(), venv, tenv, NULL, exp);
-  return Tr_getResult();
-}
 
 //* Translate variable of {simpleVar, fieldVar, subscriptVar  }
 static struct expty transVar(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_var v) {
@@ -469,4 +463,14 @@ static Ty_fieldList makeFieldTys(S_table tenv, A_fieldList fields) {
     }
   }
   return fieldTys;
+}
+
+F_fragList SEM_transProg(A_exp exp) {
+  ESC_findEscape(exp);
+  S_table tenv = E_base_tenv();
+  S_table venv = E_base_venv();
+  Tr_level baseLevel = Tr_outermost();
+  struct expty e = transExp(baseLevel, venv, tenv, NULL, exp);
+  Tr_procEntryExit(baseLevel, e.exp, NULL);
+  return Tr_getResult();
 }

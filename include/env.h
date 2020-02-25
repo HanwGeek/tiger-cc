@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Var & func entry module header file.
  * @Date: 2019-10-25 13:48:45
- * @Last Modified: 2020-02-24 18:46:55
+ * @Last Modified: 2020-02-25 20:05:26
  */
 #ifndef T_ENV_H_
 #define T_ENV_H_
@@ -31,7 +31,7 @@ struct E_enventry_ {
       Ty_ty result;} fun;
     struct {
       int d;
-      bool e;
+      bool* e;
     } esc;
   } u;
 };

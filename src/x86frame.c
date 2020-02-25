@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: X86 machine stack frame implement.
  * @Date: 2019-11-01 20:51:20
- * @Last Modified: 2020-02-24 18:01:54
+ * @Last Modified: 2020-02-25 21:46:07
  */
 #include "frame.h"
 #include "util.h"
@@ -37,17 +37,15 @@ static F_accessList F_AccessList(F_access head, F_accessList tail);
 static F_accessList makeFormalAccessList(U_boolList formals);
 
 //* Return registers temp
-static Temp_tempList F_make_arg_regs(void);
-static Temp_tempList F_make_callee_saves(void);
-static Temp_tempList F_make_caller_saves(void);
 static Temp_tempList F_callee_saves(void);
-
+static Temp_tempList F_caller_saves(void);
 //* Return special regs 
 static Temp_tempList F_special_regs(void);
 //* Pass actual params regs
 static Temp_tempList F_arg_regs(void);
 
 static void F_add_to_map(string str, Temp_temp temp);
+static Temp_tempList F_list_cat(Temp_tempList list1, Temp_tempList list2);
 
 static F_access InFrame(int offset) {
   F_access fa = checked_malloc(sizeof(*fa));
@@ -69,52 +67,16 @@ static F_accessList F_AccessList(F_access head, F_accessList tail) {
   return al;
 }
 
-static Temp_tempList F_make_arg_regs(void) {
-  Temp_temp eax = Temp_newtemp(), ebx = Temp_newtemp(),
-            ecx = Temp_newtemp(), edx = Temp_newtemp(),
-            edi = Temp_newtemp(), esi = Temp_newtemp();
-   F_add_to_map("eax", eax); F_add_to_map("ebx", ebx);
-   F_add_to_map("ecx", ecx); F_add_to_map("edx", edx);
-   F_add_to_map("edi", edi); F_add_to_map("esi", esi);
-   return Temp_TempList(eax, Temp_TempList(ebx,
-            Temp_TempList(ecx, Temp_TempList(edx,
-              Temp_TempList(edi, Temp_TempList(esi, NULL))))));
-}
-
-static Temp_tempList F_make_callee_saves(void) {
-  Temp_temp ebx = Temp_newtemp();
-  F_add_to_map("ebx", ebx);
-  return Temp_TempList(F_SP(),
-          Temp_TempList(F_FP(),
-            Temp_TempList(ebx, NULL)));
-}
-
-static Temp_tempList F_make_caller_saves(void) {
-  return Temp_TempList(F_RV(),
-          F_make_arg_regs());
-}
-
-static Temp_tempList F_callee_saves(void) {
-  return F_make_callee_saves();
-}
-
-static Temp_tempList F_special_regs(void) {
-  return Temp_TempList(F_SP(), 
-          Temp_TempList(F_FP(),
-            Temp_TempList(F_RV(), 
-              Temp_TempList(F_RA(), NULL))));
-}
-
-static Temp_tempList F_arg_regs(void) {
-  return F_make_arg_regs();
-}
-
 //* Mapping temps to registers
 Temp_map F_tempMap = NULL;
 static void F_add_to_map(string str, Temp_temp temp) {
   if (!F_tempMap)
     F_tempMap = Temp_name();
   Temp_enter(F_tempMap, temp, str);
+}
+
+static Temp_tempList F_list_cat(Temp_tempList list1, Temp_tempList list2) {
+  
 }
 
 F_frag F_StringFrag(Temp_label label, string str) {
@@ -139,10 +101,6 @@ F_fragList F_FragList(F_frag head, F_fragList tail) {
   return f;
 }
 
-Temp_tempList F_registers(void) {
-  return F_make_arg_regs();
-}
-
 F_frame F_newFrame(Temp_label name, U_boolList formals) {
   F_frame f = checked_malloc(sizeof(*f));
   f->name = name;
@@ -157,7 +115,6 @@ Temp_label F_name(F_frame f) {
 F_accessList F_formals(F_frame f) {
   return f->formals;
 }
-
 
 static F_accessList makeFormalAccessList(U_boolList formals) {
   F_accessList al = NULL;
@@ -207,6 +164,15 @@ Temp_temp F_RA(void) {
   return ra;
 }
 
+static Temp_temp zero = NULL;
+Temp_temp F_ZERO(void) {
+  if (!zero) {
+    zero = Temp_newtemp();
+    F_add_to_map("zero", zero); 
+  }
+  return zero;
+}
+
 static Temp_temp rv = NULL;
 Temp_temp F_RV(void) {
   if (!rv) {
@@ -216,8 +182,69 @@ Temp_temp F_RV(void) {
   return rv;
 }
 
+Temp_tempList callerSaves = NULL;
 Temp_tempList F_caller_saves(void) {
-  return F_make_caller_saves();
+  if (!callerSaves) {
+    //* F_RV() eax
+    //* arg reg: edi, esi, edx, ecx, *r8d, *r9d
+    calleeSaves = Temp_TempList(F_RV(), argRegs);
+  }
+  return callerSaves;
+}
+
+Temp_tempList calleeSaves = NULL;
+static Temp_tempList F_callee_saves(void) {
+  if (!calleeSaves) {
+    Temp_temp ebx = Temp_newtemp();
+    F_add_to_map("ebp", ebx);
+    calleeSaves = Temp_TempList(ebx,
+                    Temp_TempList(F_FP(), F_SP()));
+  }
+}
+
+Temp_tempList argRegs = NULL;
+static Temp_tempList F_arg_regs(void) {
+  if (!argRegs) {
+    Temp_temp edi = Temp_newtemp(), esi = Temp_newtemp(),
+              edx = Temp_newtemp(), ecx = Temp_newtemp();
+    F_add_to_map("edi", edi); F_add_to_map("esi", esi);
+    F_add_to_map("edx", edx); F_add_to_map("ecx", ecx);
+    argRegs = Temp_TempList(edi,
+                Temp_TempList(esi,
+                  Temp_TempList(edx, ecx)));    
+  }
+  return argRegs;
+}
+
+Temp_tempList specicalRegs = NULL;
+static Temp_tempList F_special_regs(void) {
+  if (!specicalRegs)
+    specicalRegs = Temp_TempList(F_SP(), 
+                    Temp_TempList(F_FP(),
+                      Temp_TempList(F_RV(), 
+                        Temp_TempList(F_RA(), F_ZERO()))));
+  return specicalRegs;
+}
+
+static Temp_tempList regs = NULL;
+Temp_tempList F_registers(void) {
+  if (!regs) {
+    Temp_tempList tail = NULL;
+    for (Temp_tempList r = F_callee_saves(); r; r = r->tail) {
+      if (!regs) {
+        regs = Temp_TempList(r->head, NULL);
+        tail = regs;
+      }
+      tail->tail = Temp_TempList(r->head, NULL);
+      tail = tail->tail;
+    }
+    for (Temp_tempList r = F_caller_saves(); r; r = r->tail) {
+      tail->tail = Temp_TempList(r->head, NULL);
+      tail = tail->tail;
+    }
+    tail->tail = Temp_TempList(F_RA(), F_ZERO());
+  }
+  return regs;
 }
 
 T_exp F_Exp(F_access acc, T_exp framePtr) {

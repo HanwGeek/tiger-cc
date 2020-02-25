@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Codegen module for x86.
  * @Date: 2020-01-06 16:44:12
- * @Last Modified: 2020-01-31 16:12:59
+ * @Last Modified: 2020-02-25 20:21:11
  */
 #include <stdlib.h>
 #include "codegen.h"
@@ -61,7 +61,7 @@ static void munchStm(T_stm s) {
                       Temp_TempList(munchExp(e2), NULL))));
             }
       } else if (dst->kind == T_TEMP) {
-        emit(AS_Move("mov  `d0, `s0\n", Temp_TempList(munchExp(dst), NULL),
+        emit(AS_Move("mov `d0, `s0\n", Temp_TempList(munchExp(dst), NULL),
               Temp_TempList(munchExp(src), NULL)));
       } else assert(0);
       break;
@@ -122,7 +122,7 @@ static Temp_temp munchExp(T_exp e) {
         //* BINOP(op, CONST(i), e2)
         Temp_temp t = Temp_newtemp();
         T_exp e2 = e->u.BINOP.right;
-        emit(AS_Oper(String_format("%s, `d0, `s0%s%d\n", op, sign, e->u.BINOP.left->u.CONST),
+        emit(AS_Oper(String_format("%s `d0, `s0%s%d\n", op, sign, e->u.BINOP.left->u.CONST),
               Temp_TempList(t, NULL), 
                 Temp_TempList(munchExp(e2), NULL), NULL));
         return t;
@@ -130,7 +130,7 @@ static Temp_temp munchExp(T_exp e) {
         //* BINOP(op, e2, CONST(i));
         Temp_temp t = Temp_newtemp();
         T_exp e2 = e->u.BINOP.left;
-        emit(AS_Oper(String_format("%s, `d0, `s0%s%d\n", op, sign, e->u.BINOP.right->u.CONST),
+        emit(AS_Oper(String_format("%s `d0, `s0%s%d\n", op, sign, e->u.BINOP.right->u.CONST),
               Temp_TempList(t, NULL),
                 Temp_TempList(munchExp(e2), NULL), NULL));
         return t;
@@ -138,7 +138,7 @@ static Temp_temp munchExp(T_exp e) {
         //* BINOP(op, e1, e2)
         Temp_temp t = Temp_newtemp();
         T_exp e1 = e->u.BINOP.left, e2 = e->u.BINOP.right;
-        emit(AS_Oper(String_format("%s, `d0, `s0%s`s1\n", op, sign),
+        emit(AS_Oper(String_format("%s `d0, `s0%s`s1\n", op, sign),
               Temp_TempList(t, NULL),
                 Temp_TempList(munchExp(e1), 
                   Temp_TempList(munchExp(e2), NULL)), NULL));
