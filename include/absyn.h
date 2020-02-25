@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Abstract tree defs header file.
  * @Date: 2019-10-21 13:50:02
- * @Last Modified: 2020-01-26 14:51:05
+ * @Last Modified: 2020-02-24 18:44:11
  */
 #ifndef T_ABSYN_H_
 #define T_ABSYN_H_
@@ -62,9 +62,9 @@ struct A_var_ {
 // expression
 struct A_exp_ {
   enum {A_varExp, A_nilExp, A_intExp, A_stringExp, 
-  A_callExp, A_opExp, A_recordExp, A_seqExp, A_assignExp,
-  A_ifExp, A_whileExp, A_forExp, A_breakExp, A_letExp,
-  A_arrayExp
+    A_callExp, A_opExp, A_recordExp, A_seqExp, A_assignExp,
+    A_ifExp, A_whileExp, A_forExp, A_breakExp, A_letExp,
+    A_arrayExp
   } kind;
   A_pos pos;
   union {

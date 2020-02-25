@@ -3,11 +3,12 @@
  * @Github: https://github.com/HanwGeek
  * @Description: runtime external functions
  * @Date: 2020-02-20 10:59:05
- * @Last Modified: 2020-02-20 10:59:23
+ * @Last Modified: 2020-02-25 15:51:35
  */
 
-#undef __STDC__
+// #undef __STDC__
 #include <stdio.h>
+#include <stdlib.h>
 
 int *initArray(int size, int init) {
   int i;

@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Var & func entry module header file.
  * @Date: 2019-10-25 13:48:45
- * @Last Modified: 2020-01-12 15:29:00
+ * @Last Modified: 2020-02-24 18:46:55
  */
 #ifndef T_ENV_H_
 #define T_ENV_H_
@@ -41,7 +41,7 @@ E_enventry E_VarEntry(Tr_access access, Ty_ty ty);
 //* Make a env entry of function
 E_enventry E_FunEntry(Tr_level level, Temp_label label, Ty_tyList formals, Ty_ty result);
 //* Make a env entry of escape var
-E_enventry E_EscEntry(int depth, bool escape);
+E_enventry E_EscEntry(int depth, bool* escape);
 
 S_table E_base_tenv(void); /* Ty_ty environment */
 S_table E_base_venv(void); /* E_enventry environment */

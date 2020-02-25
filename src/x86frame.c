@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: X86 machine stack frame implement.
  * @Date: 2019-11-01 20:51:20
- * @Last Modified: 2020-02-23 21:40:19
+ * @Last Modified: 2020-02-24 18:01:54
  */
 #include "frame.h"
 #include "util.h"
@@ -29,6 +29,7 @@ struct F_frame_ {
 
 const int F_R = 6; //* Numbers of params in reg;
 const int F_WORD_SIZE = 4; //* Define word size
+//* Return access of temp in frame with `offset` to frame pointer
 static F_access InFrame(int offset);
 static F_access InReg(Temp_temp reg);
 static F_accessList F_AccessList(F_access head, F_accessList tail);
@@ -171,7 +172,7 @@ static F_accessList makeFormalAccessList(U_boolList formals) {
 
 F_access F_allocLocal(F_frame f, bool escape) {
   f->local_count++;
-  if (escape) return InFrame(F_WORD_SIZE * (- f->local_count));
+  if (escape) return InFrame(F_WORD_SIZE * (-f->local_count));
   return InReg(Temp_newtemp());
 }
 

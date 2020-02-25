@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Semantic tranlate & check module.
  * @Date: 2019-10-25 13:45:45
- * @Last Modified: 2020-01-31 16:26:29
+ * @Last Modified: 2020-02-24 18:51:21
  */
 #include <stdlib.h>
 #include "semant.h"
@@ -15,10 +15,10 @@
 #include "translate.h"
 
 static struct expty expTy(Tr_exp exp, Ty_ty ty);
-static struct expty transVar(Tr_level, S_table, S_table, Tr_exp, A_var);
-static struct expty transExp(Tr_level, S_table, S_table, Tr_exp, A_exp);
-static Tr_exp transDec(Tr_level, S_table, S_table, Tr_exp, A_dec);
-static Ty_ty transTy(S_table, A_ty a);
+static struct expty transVar(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_var v);
+static struct expty transExp(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_exp e);
+static Tr_exp transDec(Tr_level level, S_table venv, S_table tenv, Tr_exp breakk, A_dec d);
+static Ty_ty transTy(S_table tenv, A_ty a);
 //* Return the actual type of Ty_name.ty
 static Ty_ty actual_ty(Ty_ty ty);
 static Ty_ty S_look_ty(S_table tenv, S_symbol sym);
