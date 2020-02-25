@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: X86 machine stack frame implement.
  * @Date: 2019-11-01 20:51:20
- * @Last Modified: 2020-02-25 21:46:07
+ * @Last Modified: 2020-02-25 22:03:16
  */
 #include "frame.h"
 #include "util.h"
@@ -36,16 +36,11 @@ static F_accessList F_AccessList(F_access head, F_accessList tail);
 //* Convert formal escapability boollist to F_accessList
 static F_accessList makeFormalAccessList(U_boolList formals);
 
-//* Return registers temp
-static Temp_tempList F_callee_saves(void);
-static Temp_tempList F_caller_saves(void);
-//* Return special regs 
 static Temp_tempList F_special_regs(void);
 //* Pass actual params regs
 static Temp_tempList F_arg_regs(void);
 
 static void F_add_to_map(string str, Temp_temp temp);
-static Temp_tempList F_list_cat(Temp_tempList list1, Temp_tempList list2);
 
 static F_access InFrame(int offset) {
   F_access fa = checked_malloc(sizeof(*fa));
@@ -73,10 +68,6 @@ static void F_add_to_map(string str, Temp_temp temp) {
   if (!F_tempMap)
     F_tempMap = Temp_name();
   Temp_enter(F_tempMap, temp, str);
-}
-
-static Temp_tempList F_list_cat(Temp_tempList list1, Temp_tempList list2) {
-  
 }
 
 F_frag F_StringFrag(Temp_label label, string str) {
@@ -182,28 +173,30 @@ Temp_temp F_RV(void) {
   return rv;
 }
 
-Temp_tempList callerSaves = NULL;
+static Temp_tempList callerSaves = NULL;
 Temp_tempList F_caller_saves(void) {
   if (!callerSaves) {
     //* F_RV() eax
     //* arg reg: edi, esi, edx, ecx, *r8d, *r9d
-    calleeSaves = Temp_TempList(F_RV(), argRegs);
+    callerSaves = Temp_TempList(F_RV(), F_arg_regs());
   }
   return callerSaves;
 }
 
-Temp_tempList calleeSaves = NULL;
-static Temp_tempList F_callee_saves(void) {
+static Temp_tempList calleeSaves = NULL;
+Temp_tempList F_callee_saves(void) {
   if (!calleeSaves) {
     Temp_temp ebx = Temp_newtemp();
     F_add_to_map("ebp", ebx);
     calleeSaves = Temp_TempList(ebx,
-                    Temp_TempList(F_FP(), F_SP()));
+                    Temp_TempList(F_FP(), 
+                      Temp_TempList(F_SP(), NULL)));
   }
+  return calleeSaves;
 }
 
 Temp_tempList argRegs = NULL;
-static Temp_tempList F_arg_regs(void) {
+Temp_tempList F_arg_regs(void) {
   if (!argRegs) {
     Temp_temp edi = Temp_newtemp(), esi = Temp_newtemp(),
               edx = Temp_newtemp(), ecx = Temp_newtemp();
@@ -211,7 +204,8 @@ static Temp_tempList F_arg_regs(void) {
     F_add_to_map("edx", edx); F_add_to_map("ecx", ecx);
     argRegs = Temp_TempList(edi,
                 Temp_TempList(esi,
-                  Temp_TempList(edx, ecx)));    
+                  Temp_TempList(edx, 
+                    Temp_TempList(ecx, NULL))));    
   }
   return argRegs;
 }
@@ -222,7 +216,8 @@ static Temp_tempList F_special_regs(void) {
     specicalRegs = Temp_TempList(F_SP(), 
                     Temp_TempList(F_FP(),
                       Temp_TempList(F_RV(), 
-                        Temp_TempList(F_RA(), F_ZERO()))));
+                        Temp_TempList(F_RA(),
+                          Temp_TempList(F_ZERO(), NULL)))));
   return specicalRegs;
 }
 
@@ -242,7 +237,8 @@ Temp_tempList F_registers(void) {
       tail->tail = Temp_TempList(r->head, NULL);
       tail = tail->tail;
     }
-    tail->tail = Temp_TempList(F_RA(), F_ZERO());
+    tail->tail = Temp_TempList(F_RA(), 
+                  Temp_TempList(F_ZERO(), NULL));
   }
   return regs;
 }

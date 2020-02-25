@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Stack frame prototype header file.
  * @Date: 2019-10-31 19:22:40
- * @Last Modified: 2020-02-19 17:51:31
+ * @Last Modified: 2020-02-25 22:03:06
  */
 #ifndef T_FRAME_H_
 #define T_FRAME_H_
@@ -76,9 +76,10 @@ F_frame F_newFrame(Temp_label name, U_boolList formals);
 T_exp F_externalCall(string s, T_expList args);
 //* Whether a F_access is escape or not
 bool F_isEscape(F_access access);
-
+//* Return callee saved regs 
+Temp_tempList F_callee_saves(void);
+//* Return caller saved regs
 Temp_tempList F_caller_saves(void);
-
 T_stm F_procEntryExit1(F_frame frame, T_stm stm);
 
 AS_instrList F_procEntryExit2(AS_instrList body);
