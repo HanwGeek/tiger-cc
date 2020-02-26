@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: X86 machine stack frame implement.
  * @Date: 2019-11-01 20:51:20
- * @Last Modified: 2020-02-25 22:03:16
+ * @Last Modified: 2020-02-26 10:47:31
  */
 #include "frame.h"
 #include "util.h"
@@ -256,7 +256,8 @@ T_exp F_externalCall(string s, T_expList args) {
 }
 
 T_stm F_procEntryExit1(F_frame frame, T_stm stm) {
-  return stm;
+  F_accessList args = frame->formals;
+  Temp_tempList argRegs = F_arg_regs(); 
 }
 
 static Temp_tempList returnSink = NULL;
