@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Stack frame prototype header file.
  * @Date: 2019-10-31 19:22:40
- * @Last Modified: 2020-02-25 22:03:06
+ * @Last Modified: 2020-02-29 15:28:33
  */
 #ifndef T_FRAME_H_
 #define T_FRAME_H_
@@ -54,6 +54,7 @@ T_exp F_Exp(F_access acc, T_exp framePtr);
 F_access F_allocLocal(F_frame f, bool escape);
 //* Return formals in frame{f}
 F_accessList F_formals(F_frame f);
+int F_inFrameOffset(F_access access);
 //* Return name of frame
 Temp_label F_name(F_frame f);
 //* Const val of word size

@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: X86 machine stack frame implement.
  * @Date: 2019-11-01 20:51:20
- * @Last Modified: 2020-02-26 10:47:31
+ * @Last Modified: 2020-02-29 15:29:26
  */
 #include "frame.h"
 #include "util.h"
@@ -105,6 +105,11 @@ Temp_label F_name(F_frame f) {
 
 F_accessList F_formals(F_frame f) {
   return f->formals;
+}
+
+int F_inFrameOffset(F_access access) {
+  assert(access && access->kind == inFrame);
+  return access->u.offset;
 }
 
 static F_accessList makeFormalAccessList(U_boolList formals) {

@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Codegen module for x86.
  * @Date: 2020-01-06 16:44:12
- * @Last Modified: 2020-02-25 20:21:11
+ * @Last Modified: 2020-02-29 15:25:46
  */
 #include <stdlib.h>
 #include "codegen.h"
@@ -61,6 +61,7 @@ static void munchStm(T_stm s) {
                       Temp_TempList(munchExp(e2), NULL))));
             }
       } else if (dst->kind == T_TEMP) {
+        //* MOVE(e1, e2)
         emit(AS_Move("mov `d0, `s0\n", Temp_TempList(munchExp(dst), NULL),
               Temp_TempList(munchExp(src), NULL)));
       } else assert(0);
