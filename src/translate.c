@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Tranlate abysn to IR module.
  * @Date: 2019-10-31 21:34:35
- * @Last Modified: 2020-02-24 11:14:43
+ * @Last Modified: 2020-03-07 17:55:27
  */
 #include "translate.h"
 #include "absyn.h"
@@ -222,8 +222,8 @@ static Tr_accessList makeFormalAccessList(Tr_level lev) {
 static F_fragList fragList = NULL;
 static F_fragList stringList = NULL;
 void Tr_procEntryExit(Tr_level level, Tr_exp body, Tr_accessList formals) {
-  F_frag pfrag = F_ProcFrag(unNx(body), level->frame);
-  fragList = F_FragList(pfrag, fragList);
+  T_stm stm = F_procEntryExit1(level->frame, unEx(body));
+  fragList = F_FragList(F_ProcFrag(stm, level->frame), fragList);
 }
 
 F_fragList Tr_getResult(void) {

@@ -22,6 +22,10 @@ CODEGENTEST_OBJS = $(patsubst %, $(OBJ_DIR)/%, $(CODEGENTEST_OBJECTS))
 all: parsetest treetest codegentest
 	@echo "All build complete!"
 
+compile: $(OBJS) main.o
+	$(CC) $^ -g -o $(BIN_DIR)/tigercc
+	@echo "Compiler build complete!"
+
 parsetest: $(OBJS) $(PARSETEST_OBJS) 
 	$(CC) $^ -g -o $(BIN_DIR)/parsetest
 	@echo "Parsetest build complete!"

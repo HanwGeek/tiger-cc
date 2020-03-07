@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: X86 machine stack frame implement.
  * @Date: 2019-11-01 20:51:20
- * @Last Modified: 2020-02-29 15:29:26
+ * @Last Modified: 2020-03-07 17:49:22
  */
 #include "frame.h"
 #include "util.h"
@@ -155,7 +155,7 @@ static Temp_temp ra = NULL;
 Temp_temp F_RA(void) {
   if (!ra) {
     ra = Temp_newtemp();
-    F_add_to_map("rdkd", ra);
+    F_add_to_map("rbkd", ra);
   }
   return ra;
 }
@@ -260,9 +260,50 @@ T_exp F_externalCall(string s, T_expList args) {
   return T_Call(T_Name(Temp_namedlabel(s)), args);
 }
 
-T_stm F_procEntryExit1(F_frame frame, T_stm stm) {
+T_stm F_procEntryExit1(F_frame frame, T_exp body) {
+  //* Generate prologue
+  // Store function return addr reg
+  Temp_temp ra_temp = Temp_newtemp();
+  T_stm pro = T_Move(T_Temp(ra_temp), T_Temp(F_RA()));
+
+  // Store callee save regs
+  Temp_tempList calleesaves = F_callee_saves();
+  Temp_tempList calleesaves_temp = NULL, tailList = NULL;
+  for (; calleesaves; calleesaves = calleesaves->tail) {
+    Temp_tempList t = Temp_TempList(Temp_newtemp(), NULL);
+    if (calleesaves_temp) {
+      calleesaves_temp = t;
+      tailList = calleesaves_temp;
+    } else {
+      tailList->tail = t;
+      tailList = tailList->tail;
+    }
+    pro = T_Seq(pro, 
+            T_Move(T_Temp(t->head), 
+              T_Temp(calleesaves->head)));
+  }
+
+  // Store arg regs
   F_accessList args = frame->formals;
   Temp_tempList argRegs = F_arg_regs(); 
+  for (; args; args = args->tail)
+    pro = T_Seq(pro, 
+            T_Move(F_Exp(args->head, T_Temp(F_FP())),
+              T_Temp(args->head)));
+
+  //* Generate epilogue
+  // Restore calleesaves
+  T_stm epi = T_Move(F_RV(), body);
+  for (; calleesaves; calleesaves = calleesaves->tail)
+    epi = T_Seq(epi, 
+            T_Move(T_Temp(calleesaves->head),
+              T_Temp(calleesaves_temp->head)));
+  // Restore function return addr reg
+  epi = T_Seq(epi,
+          T_Move(T_Temp(F_RA()),
+            T_Temp(ra_temp)));
+  
+  return T_Seq(pro, epi);
 }
 
 static Temp_tempList returnSink = NULL;

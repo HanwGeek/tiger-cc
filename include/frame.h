@@ -3,7 +3,7 @@
  * @Github: https://github.com/HanwGeek
  * @Description: Stack frame prototype header file.
  * @Date: 2019-10-31 19:22:40
- * @Last Modified: 2020-02-29 15:28:33
+ * @Last Modified: 2020-03-07 18:36:25
  */
 #ifndef T_FRAME_H_
 #define T_FRAME_H_
@@ -81,7 +81,13 @@ bool F_isEscape(F_access access);
 Temp_tempList F_callee_saves(void);
 //* Return caller saved regs
 Temp_tempList F_caller_saves(void);
-T_stm F_procEntryExit1(F_frame frame, T_stm stm);
+
+string F_string(F_frag str) {
+  
+}
+
+//* Generate prolog & epilog of proc
+T_stm F_procEntryExit1(F_frame frame, T_exp body);
 
 AS_instrList F_procEntryExit2(AS_instrList body);
 
