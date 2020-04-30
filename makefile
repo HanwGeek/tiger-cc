@@ -59,13 +59,13 @@ $(SRC_DIR)/lex.yy.c: $(SRC_DIR)/tiger.l
 $(SRC_DIR)/y.tab.c: $(SRC_DIR)/tiger.y 
 	yacc --debug -ydvo $@ $<
 
-$(PARSETEST_OBJS):$(OBJ_DIR)/%.o: $(TEST_DIR)/%.c
+$(PARSETEST_OBJS): $(OBJ_DIR)/%.o: $(TEST_DIR)/%.c
 	$(CC) $(CFLAGS) $@ $<
 
 $(OBJ_DIR)/parsetest.o: $(TEST_DIR)/parsetest.c
 	$(CC) $(CFLAGS) $@ $<
 
-$(TREETEST_OBJS):$(OBJ_DIR)/%.o: $(TEST_DIR)/%.c
+$(TREETEST_OBJS): $(OBJ_DIR)/%.o: $(TEST_DIR)/%.c
 	$(CC) $(CFLAGS) $@ $<
 
 $(OBJ_DIR)/treetest.o: $(TEST_DIR)/treetest.c
